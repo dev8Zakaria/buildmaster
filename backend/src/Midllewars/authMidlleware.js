@@ -4,7 +4,7 @@ import env from 'dotenv'
 env.config();
 
 export const authMidlleware=async (req,res,next)=>{
-    const authHeader=req.body.authorization || req.body.Authorization;
+    const authHeader=req.header.authorization || req.header.Authorization;
     if(!authHeader) return res.status(400).json({msg : "the token is not there"});
     const token=authHeader.split(' ')[1];
     const payload=jwt.verify(token,process.env.ACCES_TOKEN_SECRET);
