@@ -33,7 +33,8 @@ export const login = async (req,res)=>{
     const {email,password}=req.body;
     let user=await prismaClient.user.findFirst({where:{email}})
     if(!user) return res.status(404).json({msg : "there is no user with this email"})
-    if(!bcrypt.compare(password,user.password)) return res.status(403).json({msg:"the password is incorrect"})
+    const match=await bcrypt.compare(password,user.password);
+    if(!match) return res.status(403).json({msg:"the password is incorrect"})
     const token = jwt.sign(
         {
             userInfo:{
