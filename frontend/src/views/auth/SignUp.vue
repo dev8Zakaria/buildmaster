@@ -41,7 +41,7 @@ const handleSignup = async () => {
                     Create an account
                 </h2>
                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    Join Mini Market today
+                    Join Build Master today
                 </p>
             </div>
             

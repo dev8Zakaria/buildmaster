@@ -17,7 +17,7 @@ const handleLogout = () => {
     <!-- Hero Section -->
     <div class="max-w-2xl space-y-8">
         <h1 class="text-6xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
-            Mini Market
+            Build Master
         </h1>
         
         <p class="text-xl text-gray-600 dark:text-gray-300">
