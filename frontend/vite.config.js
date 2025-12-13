@@ -1,24 +1,16 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import tailwindcss from "tailwindcss";
-import autoprefixer from "autoprefixer";
+import vuetify from "vite-plugin-vuetify";
 import path from "path";
 
 export default defineConfig({
   plugins: [
     vue(),
+    vuetify({ autoImport: true }), // Enabled tree-shaking
   ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  css: {
-    postcss: {
-      plugins: [
-        tailwindcss,
-        autoprefixer,
-      ],
     },
   },
   server: {

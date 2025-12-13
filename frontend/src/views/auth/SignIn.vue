@@ -2,8 +2,6 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -15,9 +13,17 @@ const form = ref({
 
 const error = ref('');
 const isLoading = ref(false);
+const visible = ref(false);
 
 const handleLogin = async () => {
     error.value = '';
+    
+    // Basic client-side validation
+    if (!form.value.email || !form.value.password) {
+        error.value = 'Please fill in all fields';
+        return;
+    }
+
     isLoading.value = true;
     try {
         await authStore.login(form.value);
@@ -31,67 +37,66 @@ const handleLogin = async () => {
 </script>
 
 <template>
-    <div class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-zinc-900 px-4">
-        <div class="w-full max-w-md space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-xl shadow-lg border border-gray-100 dark:border-zinc-700">
-            <div class="text-center">
-                <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                    Welcome back
-                </h2>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    Sign in to your account
-                </p>
-            </div>
-            
-            <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
-                <div class="space-y-4 rounded-md shadow-sm">
-                    <div>
-                        <label for="email-address" class="sr-only">Email address</label>
-                        <Input
-                            id="email-address"
-                            v-model="form.email"
-                            type="email"
-                            autocomplete="email"
-                            required
-                            placeholder="Email address"
-                            class="bg-gray-50 dark:bg-zinc-900/50"
-                        />
-                    </div>
-                    <div>
-                        <label for="password" class="sr-only">Password</label>
-                        <Input
-                            id="password"
-                            v-model="form.password"
-                            type="password"
-                            autocomplete="current-password"
-                            required
-                            placeholder="Password"
-                            class="bg-gray-50 dark:bg-zinc-900/50"
-                        />
-                    </div>
-                </div>
+  <v-container class="fill-height justify-center">
+    <v-card width="400" class="pa-5" elevation="8" rounded="lg">
+      <v-card-title class="text-h5 font-weight-bold text-center mb-4">
+        Welcome Back
+      </v-card-title>
+      <v-card-subtitle class="text-center mb-6">
+        Sign in to your account
+      </v-card-subtitle>
 
-                <div v-if="error" class="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/20 p-2 rounded">
-                    {{ error }}
-                </div>
+      <v-form @submit.prevent="handleLogin">
+        <v-text-field
+          v-model="form.email"
+          label="Email address"
+          prepend-inner-icon="mdi-email-outline"
+          variant="outlined"
+          type="email"
+          required
+        ></v-text-field>
 
-                <div>
-                    <Button
-                        type="submit"
-                        class="w-full"
-                        :disabled="isLoading"
-                    >
-                        <span v-if="isLoading">Signing in...</span>
-                        <span v-else>Sign in</span>
-                    </Button>
-                </div>
-            </form>
+        <v-text-field
+          v-model="form.password"
+          label="Password"
+          prepend-inner-icon="mdi-lock-outline"
+          variant="outlined"
+          :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+          :type="visible ? 'text' : 'password'"
+          @click:append-inner="visible = !visible"
+          required
+        ></v-text-field>
 
-            <div class="text-center text-sm">
-                <span class="text-gray-600 dark:text-gray-400">Don't have an account? </span>
-                <router-link to="/signup" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-                    Sign up
-                </router-link>
-            </div>
-        </div>
-    </div>
+        <v-alert
+          v-if="error"
+          type="error"
+          variant="tonal"
+          class="mb-4"
+          closable
+        >
+          {{ error }}
+        </v-alert>
+
+        <v-btn
+          type="submit"
+          block
+          color="primary"
+          size="large"
+          variant="elevated"
+          :loading="isLoading"
+        >
+          Sign In
+        </v-btn>
+      </v-form>
+
+      <v-divider class="my-4"></v-divider>
+
+      <div class="text-center text-body-2">
+        Don't have an account?
+        <router-link to="/signup" class="text-decoration-none font-weight-bold text-primary">
+          Sign up
+        </router-link>
+      </div>
+    </v-card>
+  </v-container>
 </template>

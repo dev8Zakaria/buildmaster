@@ -1,7 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import Button from '@/components/ui/Button.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -13,45 +12,59 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col items-center justify-center p-4 bg-white dark:bg-black text-center">
-    <!-- Hero Section -->
-    <div class="max-w-2xl space-y-8">
-        <h1 class="text-6xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
-            Mini Market
+  <v-app>
+    <v-main class="bg-grey-lighten-4 fill-height d-flex flex-column align-center justify-center">
+      <v-container class="text-center">
+        <h1 class="text-h2 font-weight-black text-primary mb-2">
+          Mini Market
         </h1>
-        
-        <p class="text-xl text-gray-600 dark:text-gray-300">
-            Experience the future of grocery shopping. Fresh, fast, and at your fingertips.
+        <p class="text-h5 text-medium-emphasis mb-10">
+          Experience the future of grocery shopping.
         </p>
 
         <!-- Dynamic Content based on Auth State -->
-        <div v-if="authStore.user" class="space-y-6">
-            <div class="p-6 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800">
-                <p class="text-2xl font-bold dark:text-white">
-                    Welcome back, {{ authStore.user.firstName || 'User' }}!
-                </p>
-                <p class="text-gray-500 dark:text-gray-400 mt-2">
-                    You are logged in as <span class="badge bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">{{ authStore.user.role || 'Customer' }}</span>
-                </p>
-            </div>
-            
-            <Button @click="handleLogout" variant="destructive" size="lg">
+        <div v-if="authStore.user">
+          <v-card class="mx-auto pa-6 mb-6" max-width="500" elevation="4" rounded="lg">
+            <v-card-text>
+              <h2 class="text-h5 font-weight-bold mb-2">
+                Welcome back, {{ authStore.user.firstName || 'User' }}!
+              </h2>
+              <div class="mt-2">
+                You are logged in as
+                <v-chip color="secondary" class="font-weight-bold">
+                  {{ authStore.user.role || 'Customer' }}
+                </v-chip>
+              </div>
+            </v-card-text>
+            <v-card-actions class="justify-center">
+               <v-btn color="error" variant="outlined" size="large" @click="handleLogout">
                 Log Out
-            </Button>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
         </div>
 
-        <div v-else class="flex flex-col sm:flex-row gap-4 justify-center">
-            <router-link to="/login">
-                <Button size="lg" class="w-full sm:w-auto">
-                    Sign In
-                </Button>
-            </router-link>
-            <router-link to="/signup">
-                <Button variant="outline" size="lg" class="w-full sm:w-auto">
-                    Create Account
-                </Button>
-            </router-link>
+        <div v-else class="d-flex flex-column flex-sm-row justify-center ga-4">
+          <v-btn
+            color="primary"
+            size="x-large"
+            to="/login"
+            prepend-icon="mdi-login"
+            elevation="4"
+          >
+            Sign In
+          </v-btn>
+          <v-btn
+            color="secondary"
+            variant="outlined"
+            size="x-large"
+            to="/signup"
+            prepend-icon="mdi-account-plus"
+          >
+            Create Account
+          </v-btn>
         </div>
-    </div>
-  </div>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>

@@ -2,8 +2,6 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -13,18 +11,26 @@ const form = ref({
     lastName: '',
     email: '',
     password: '',
-    role: 'Customer' // Default role as per requirements
+    role: 'Customer'
 });
 
 const error = ref('');
 const isLoading = ref(false);
+const visible = ref(false);
 
 const handleSignup = async () => {
     error.value = '';
+
+    // Basic Validation
+    if (!form.value.firstName || !form.value.lastName || !form.value.email || !form.value.password) {
+        error.value = "All fields are required";
+        return;
+    }
+
     isLoading.value = true;
     try {
         await authStore.signup(form.value);
-        router.push('/login'); // Redirect to login after successful signup
+        router.push('/login'); 
     } catch (err) {
         error.value = err;
     } finally {
@@ -34,90 +40,85 @@ const handleSignup = async () => {
 </script>
 
 <template>
-    <div class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-zinc-900 px-4">
-        <div class="w-full max-w-md space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-xl shadow-lg border border-gray-100 dark:border-zinc-700">
-            <div class="text-center">
-                <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                    Create an account
-                </h2>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    Join Mini Market today
-                </p>
-            </div>
-            
-            <form class="mt-8 space-y-6" @submit.prevent="handleSignup">
-                <div class="space-y-4 rounded-md shadow-sm">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="firstName" class="sr-only">First Name</label>
-                            <Input
-                                id="firstName"
-                                v-model="form.firstName"
-                                type="text"
-                                required
-                                placeholder="First Name"
-                                class="bg-gray-50 dark:bg-zinc-900/50"
-                            />
-                        </div>
-                         <div>
-                            <label for="lastName" class="sr-only">Last Name</label>
-                            <Input
-                                id="lastName"
-                                v-model="form.lastName"
-                                type="text"
-                                required
-                                placeholder="Last Name"
-                                class="bg-gray-50 dark:bg-zinc-900/50"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <label for="email-address" class="sr-only">Email address</label>
-                        <Input
-                            id="email-address"
-                            v-model="form.email"
-                            type="email"
-                            autocomplete="email"
-                            required
-                            placeholder="Email address"
-                            class="bg-gray-50 dark:bg-zinc-900/50"
-                        />
-                    </div>
-                    <div>
-                        <label for="password" class="sr-only">Password</label>
-                        <Input
-                            id="password"
-                            v-model="form.password"
-                            type="password"
-                            autocomplete="current-password"
-                            required
-                            placeholder="Password"
-                            class="bg-gray-50 dark:bg-zinc-900/50"
-                        />
-                    </div>
-                </div>
+  <v-container class="fill-height justify-center">
+    <v-card width="500" class="pa-5" elevation="8" rounded="lg">
+      <v-card-title class="text-h5 font-weight-bold text-center mb-4">
+        Create an Account
+      </v-card-title>
+      <v-card-subtitle class="text-center mb-6">
+        Join Mini Market today
+      </v-card-subtitle>
 
-                <div v-if="error" class="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/20 p-2 rounded">
-                    {{ error }}
-                </div>
+      <v-form @submit.prevent="handleSignup">
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.firstName"
+              label="First Name"
+              variant="outlined"
+              required
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="form.lastName"
+              label="Last Name"
+              variant="outlined"
+              required
+            ></v-text-field>
+          </v-col>
+        </v-row>
 
-                <div>
-                    <Button
-                        type="submit"
-                        class="w-full"
-                        :disabled="isLoading"
-                    >
-                        <span v-if="isLoading">Creating account...</span>
-                        <span v-else>Sign up</span>
-                    </Button>
-                </div>
-            </form>
-             <div class="text-center text-sm">
-                <span class="text-gray-600 dark:text-gray-400">Already have an account? </span>
-                <router-link to="/login" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-                    Sign in
-                </router-link>
-            </div>
-        </div>
-    </div>
+        <v-text-field
+          v-model="form.email"
+          label="Email address"
+          prepend-inner-icon="mdi-email-outline"
+          variant="outlined"
+          type="email"
+          required
+        ></v-text-field>
+
+        <v-text-field
+          v-model="form.password"
+          label="Password"
+          prepend-inner-icon="mdi-lock-outline"
+          variant="outlined"
+          :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+          :type="visible ? 'text' : 'password'"
+          @click:append-inner="visible = !visible"
+          required
+        ></v-text-field>
+
+        <v-alert
+          v-if="error"
+          type="error"
+          variant="tonal"
+          class="mb-4"
+          closable
+        >
+          {{ error }}
+        </v-alert>
+
+        <v-btn
+          type="submit"
+          block
+          color="primary"
+          size="large"
+          variant="elevated"
+          :loading="isLoading"
+        >
+          Sign Up
+        </v-btn>
+      </v-form>
+
+      <v-divider class="my-4"></v-divider>
+
+      <div class="text-center text-body-2">
+        Already have an account?
+        <router-link to="/login" class="text-decoration-none font-weight-bold text-primary">
+          Sign in
+        </router-link>
+      </div>
+    </v-card>
+  </v-container>
 </template>
