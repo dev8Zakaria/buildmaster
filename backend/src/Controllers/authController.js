@@ -8,7 +8,7 @@ env.config();
 
 export const signup =async (req,res)=>{
     const {email,firstName,lastName,password}=req.body;
-    const validRoles = ['Admin', 'Customer', 'Cashier'];
+    const validRoles = ['Admin', 'Customer'];
     let userRole = req.body.role || 'Customer';
     userRole = userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase();
     if (!validRoles.includes(userRole)) return res.status(400).json({msg: `Invalid role. Allowed roles: ${validRoles.join(', ')}`});

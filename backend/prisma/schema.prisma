@@ -10,7 +10,6 @@ datasource db {
 enum Role{
   Admin
   Customer
-  Cashier
 }
 
 model User {
