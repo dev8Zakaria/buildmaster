@@ -1,10 +1,10 @@
-import prismaClient from '../server.js'
+import prismaClient from '../Config/prisma.js'
 import jwt from 'jsonwebtoken'
 import env from 'dotenv'
 env.config();
 
 export const authMidlleware=async (req,res,next)=>{
-    const authHeader=req.header.authorization || req.header.Authorization;
+    const authHeader=req.headers.authorization || req.headers.Authorization;
     if(!authHeader) return res.status(400).json({msg : "the token is not there"});
     const token=authHeader.split(' ')[1];
     const payload=jwt.verify(token,process.env.ACCES_TOKEN_SECRET);
