@@ -8,17 +8,9 @@ export const isAdmin=async (req,res,next)=>{
 }
 export const isClient=async (req,res,next)=>{
     const user=req.user;
-    if(user.role=='Client'){
+    if(user.role=='Customer'){
         next()
     }else{
         return res.status(401).json({msg : " this function needs client priviliege"})
-    }
-}
-export const isCashier=async (req,res,next)=>{
-    const user=req.user;
-    if(user.role=='Cashier'){
-        next()
-    }else{
-        return res.status(401).json({msg : " this function needs cashier priviliege"})
     }
 }

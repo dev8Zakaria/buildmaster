@@ -1,37 +1,33 @@
 services:
   backend:
-    build: ./backend
-    container_name: minimarket_backend
+    build:
+      context: ./backend
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+    container_name: build_master_backend
     env_file: .env
-    working_dir: /usr/src/app
-    command: npm run dev
     ports:
-      - "${BACKEND_PORT:-3001}:3000"
+      - "${BACKEND_PORT}:3000"
+      - "5555:5555"
     depends_on:
-      - db
-    volumes:
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
+      db:
+        condition: service_healthy
+    restart: on-failure  # Add this line
+    command: sh -c "npx prisma migrate deploy && npm run dev"
 
   frontend:
     build: ./frontend
-    container_name: minimarket_frontend
+    container_name: build_master_frontend
     env_file: .env
-    working_dir: /usr/src/app
-    command: npm run dev -- --host 0.0.0.0 --port 5173
     ports:
-      - "${FRONTEND_PORT:-5173}:5173"
+      - "${FRONTEND_PORT}:5173"
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/usr/src/app
-      - /usr/src/app/node_modules
 
   db:
     image: postgres:16
-    container_name: minimarket_db
+    container_name: build_master_db
     restart: always
-    env_file: .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -39,18 +35,25 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s 
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: minimarket_pgadmin
-    depends_on:
-      - db
+    container_name: build_master_pgadmin
+    restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
-      - "8081:80"
+      - "8080:80"
+    depends_on:
+      - db
 
 volumes:
-  db_data:
+  pgdata:
