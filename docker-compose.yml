@@ -27,7 +27,7 @@ services:
   db:
     image: postgres:16
     container_name: build_master_db
-    restart: always
+    restart: no
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -46,7 +46,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: build_master_pgadmin
-    restart: always
+    restart: no
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}

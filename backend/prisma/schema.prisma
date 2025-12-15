@@ -18,15 +18,64 @@ model User {
   lastName  String
   email     String @unique
   password  String
-  role  Role
+  role  Role @default(Customer)
+  orders Order[]
   @@map("users")
 }
 
-model Product{
-  id String @id @default(uuid())
-  name String 
-  description String
-  ImageUrl String @unique
-  price Float
-  @@map("products")
+model Component {
+  id             String       @id @default(uuid())
+  name           String
+  brand          String
+  price          Decimal   @db.Decimal(10, 2)
+  stock          Int       @default(0)
+  ImageUrl       String?
+  isActive       Boolean   @default(true)
+  // Le champ JSON permet de stocker socket, tdp, vram, etc. sans multiplier les colonnes 
+  specifications Json      
+  // Relations
+  categoryId     Int
+  category       Category  @relation(fields: [categoryId], references: [id])
+  
+  orderItems     OrderItem[]
+
+  @@map("components")
+}
+model Category {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String?
+  
+  components  Component[]
+
+  @@map("component_categories")
+}
+
+model Order{
+  id              Int         @id @default(autoincrement())
+  createdAt       DateTime    @default(now())
+  
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  
+  
+  // Relations
+  userId          Int
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          Int       @id @default(autoincrement())
+  quantity    Int
+  unitPrice   Decimal   @db.Decimal(10, 2) // Prix figé au moment de l'achat
+  
+  orderId     Int
+  order       Order     @relation(fields: [orderId], references: [id])
+  
+  componentId String
+  component   Component @relation(fields: [componentId], references: [id])
+
+  @@map("order_items")
 }
