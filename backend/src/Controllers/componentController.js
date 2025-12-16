@@ -9,6 +9,9 @@ export const createComponent = async (req, res) => {
         // Attention : avec form-data, tout arrive en string !
         const { name, brand, price, stock, categoryId, specifications } = req.body;
 
+        if (!req.file) {
+            return res.status(400).json({ error: "L'image du composant est obligatoire." });
+        }
         // Validation basique
         if (!categoryId) return res.status(400).json({ error: "La catégorie est obligatoire" });
 
