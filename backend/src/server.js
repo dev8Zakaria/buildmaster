@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import auth from './Routes/auth.js'
-import product from './Routes/product.js'
+
 import category from './Routes/category.js'
 import component from './Routes/component.js'
 
