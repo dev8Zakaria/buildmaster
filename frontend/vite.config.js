@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import tailwindcss from "tailwindcss";
 import autoprefixer from "autoprefixer";
 import path from "path";
+import vuetify from 'vite-plugin-vuetify';
 
 export default defineConfig({
   plugins: [
