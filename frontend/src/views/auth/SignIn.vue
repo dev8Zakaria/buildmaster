@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
+import IInput from '@/UI-elements/Inspira/IInput.vue';
+import InteractiveHoverButton from '@/UI-elements/Inspira/InteractiveHoverButton.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -46,7 +46,7 @@ const handleLogin = async () => {
                 <div class="space-y-4 rounded-md shadow-sm">
                     <div>
                         <label for="email-address" class="sr-only">Email address</label>
-                        <Input
+                        <IInput
                             id="email-address"
                             v-model="form.email"
                             type="email"
@@ -58,7 +58,7 @@ const handleLogin = async () => {
                     </div>
                     <div>
                         <label for="password" class="sr-only">Password</label>
-                        <Input
+                        <IInput
                             id="password"
                             v-model="form.password"
                             type="password"
@@ -74,15 +74,13 @@ const handleLogin = async () => {
                     {{ error }}
                 </div>
 
-                <div>
-                    <Button
+                <div class="flex justify-center">
+                    <InteractiveHoverButton
                         type="submit"
                         class="w-full"
                         :disabled="isLoading"
-                    >
-                        <span v-if="isLoading">Signing in...</span>
-                        <span v-else>Sign in</span>
-                    </Button>
+                        :text="isLoading ? 'Signing in...' : 'Sign in'"
+                    />
                 </div>
             </form>
 

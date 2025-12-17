@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
+import IInput from '@/UI-elements/Inspira/IInput.vue';
+import InteractiveHoverButton from '@/UI-elements/Inspira/InteractiveHoverButton.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -50,7 +50,7 @@ const handleSignup = async () => {
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="firstName" class="sr-only">First Name</label>
-                            <Input
+                            <IInput
                                 id="firstName"
                                 v-model="form.firstName"
                                 type="text"
@@ -61,7 +61,7 @@ const handleSignup = async () => {
                         </div>
                          <div>
                             <label for="lastName" class="sr-only">Last Name</label>
-                            <Input
+                            <IInput
                                 id="lastName"
                                 v-model="form.lastName"
                                 type="text"
@@ -73,7 +73,7 @@ const handleSignup = async () => {
                     </div>
                     <div>
                         <label for="email-address" class="sr-only">Email address</label>
-                        <Input
+                        <IInput
                             id="email-address"
                             v-model="form.email"
                             type="email"
@@ -85,7 +85,7 @@ const handleSignup = async () => {
                     </div>
                     <div>
                         <label for="password" class="sr-only">Password</label>
-                        <Input
+                        <IInput
                             id="password"
                             v-model="form.password"
                             type="password"
@@ -101,15 +101,13 @@ const handleSignup = async () => {
                     {{ error }}
                 </div>
 
-                <div>
-                    <Button
+                <div class="flex justify-center">
+                    <InteractiveHoverButton
                         type="submit"
                         class="w-full"
                         :disabled="isLoading"
-                    >
-                        <span v-if="isLoading">Creating account...</span>
-                        <span v-else>Sign up</span>
-                    </Button>
+                        :text="isLoading ? 'Creating account...' : 'Sign up'"
+                    />
                 </div>
             </form>
              <div class="text-center text-sm">

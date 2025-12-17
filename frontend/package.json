@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@flaticon/flaticon-uicons": "^3.3.1",
     "@iconify/vue": "^5.0.0",
     "@vueuse/core": "^14.1.0",
     "axios": "^1.13.2",

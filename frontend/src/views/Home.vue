@@ -1,7 +1,7 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import Button from '@/components/ui/Button.vue';
+import InteractiveHoverButton from '@/UI-elements/Inspira/InteractiveHoverButton.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -16,7 +16,7 @@ const handleLogout = () => {
   <div class="flex min-h-screen flex-col items-center justify-center p-4 bg-white dark:bg-black text-center">
     <!-- Hero Section -->
     <div class="max-w-2xl space-y-8">
-        <h1 class="text-6xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+        <h1 class="text-6xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-600 dark:from-yellow-400 dark:to-yellow-500">
             Build Master
         </h1>
         
@@ -31,25 +31,21 @@ const handleLogout = () => {
                     Welcome back, {{ authStore.user.firstName || 'User' }}!
                 </p>
                 <p class="text-gray-500 dark:text-gray-400 mt-2">
-                    You are logged in as <span class="badge bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">{{ authStore.user.role || 'Customer' }}</span>
+                    You are logged in as <span class="badge bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-yellow-200 dark:text-yellow-900">{{ authStore.user.role || 'Customer' }}</span>
                 </p>
             </div>
             
-            <Button @click="handleLogout" variant="destructive" size="lg">
-                Log Out
-            </Button>
+            <div class="flex justify-center">
+                <InteractiveHoverButton @click="handleLogout" text="Log Out" class="bg-red-500 hover:bg-red-600 text-white border-red-500" />
+            </div>
         </div>
 
-        <div v-else class="flex flex-col sm:flex-row gap-4 justify-center">
+        <div v-else class="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <router-link to="/login">
-                <Button size="lg" class="w-full sm:w-auto">
-                    Sign In
-                </Button>
+                <InteractiveHoverButton text="Sign In" />
             </router-link>
             <router-link to="/signup">
-                <Button variant="outline" size="lg" class="w-full sm:w-auto">
-                    Create Account
-                </Button>
+                <InteractiveHoverButton text="Create Account" class="bg-transparent border border-yellow-500 text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20" />
             </router-link>
         </div>
     </div>

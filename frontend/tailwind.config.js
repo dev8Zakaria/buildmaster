@@ -5,9 +5,12 @@ export default {
   darkMode: "selector",
   safelist: ["dark"],
   prefix: "",
-  content: ["./index.html","./public/**/*.html", "./src/**/*.{vue,js,ts,jsx,tsx}","./pages/**/*.{vue,js}" ],
+  content: ["./index.html", "./public/**/*.html", "./src/**/*.{vue,js,ts,jsx,tsx}", "./pages/**/*.{vue,js}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Franklin Gothic Medium"', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
