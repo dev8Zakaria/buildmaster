@@ -7,6 +7,7 @@ import path from "path";
 export default defineConfig({
   plugins: [
     vue(),
+    vuetify({ autoImport: true }), // Vuetify plugin
   ],
   resolve: {
     alias: {
@@ -15,10 +16,7 @@ export default defineConfig({
   },
   css: {
     postcss: {
-      plugins: [
-        tailwindcss,
-        autoprefixer,
-      ],
+      plugins: [tailwindcss, autoprefixer],
     },
   },
   server: {
@@ -26,8 +24,8 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "http://localhost:3000",
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 });

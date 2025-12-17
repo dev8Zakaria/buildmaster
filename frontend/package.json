@@ -16,7 +16,8 @@
     "motion-v": "^1.7.4",
     "pinia": "^3.0.4",
     "vue": "^3.5.24",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "vuetify": "^3.11.4"
   },
   "devDependencies": {
     "@inspira-ui/plugins": "^0.0.1",
@@ -25,9 +26,11 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "postcss": "^8.5.6",
+    "sass": "^1.97.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
-    "vite": "^7.2.7"
+    "vite": "^7.2.7",
+    "vite-plugin-vuetify": "^2.1.2"
   }
 }
