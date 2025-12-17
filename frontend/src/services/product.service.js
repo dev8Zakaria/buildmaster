@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_URL = '/api/component';
-const CAT_URL = '/api/category';
+// Point directly to the backend port
+const API_URL = 'http://localhost:3000/api/component';
+const CAT_URL = 'http://localhost:3000/api/category';
 
 export const productService = {
   getAll() { return axios.get(API_URL); },
