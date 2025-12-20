@@ -46,8 +46,8 @@ export const useAdminStore = defineStore('admin', () => {
             await api.post('/category', data);
             await fetchCategories();
         } catch (err) {
-            error.value = err.response?.data?.message || 'Failed to create category';
-            throw err;
+            error.value = err.response?.data?.details || err.response?.data?.error || err.response?.data?.message || 'Failed to create category';
+            throw error.value;
         } finally {
             isLoading.value = false;
         }
@@ -58,7 +58,7 @@ export const useAdminStore = defineStore('admin', () => {
             await api.delete(`/category/${id}`);
             await fetchCategories();
         } catch (err) {
-            throw err.response?.data?.message || 'Failed to delete category';
+            throw err.response?.data?.details || err.response?.data?.error || err.response?.data?.message || 'Failed to delete category';
         }
     };
 
@@ -84,8 +84,8 @@ export const useAdminStore = defineStore('admin', () => {
             // Also refresh categories to update counts
             await fetchCategories();
         } catch (err) {
-            error.value = err.response?.data?.message || 'Failed to create component';
-            throw err;
+            error.value = err.response?.data?.details || err.response?.data?.error || err.response?.data?.message || 'Failed to create component';
+            throw error.value;
         } finally {
             isLoading.value = false;
         }
@@ -97,8 +97,8 @@ export const useAdminStore = defineStore('admin', () => {
             await api.put(`/component/${id}`, data);
             await fetchComponents();
         } catch (err) {
-            error.value = err.response?.data?.message || 'Failed to update component';
-            throw err;
+            error.value = err.response?.data?.details || err.response?.data?.error || err.response?.data?.message || 'Failed to update component';
+            throw error.value;
         } finally {
             isLoading.value = false;
         }
@@ -110,7 +110,7 @@ export const useAdminStore = defineStore('admin', () => {
             await fetchComponents();
             await fetchCategories();
         } catch (err) {
-            throw err.response?.data?.message || 'Failed to delete component';
+            throw err.response?.data?.details || err.response?.data?.error || err.response?.data?.message || 'Failed to delete';
         }
     };
 

@@ -6,6 +6,8 @@ import AdminTable from '@/UI-elements/as_Inspira/AdminTable.vue';
 import Input from '@/UI-elements/as_Inspira/Input.vue';
 import Button from '@/UI-elements/as_Inspira/Button.vue';
 import FileUpload from '@/UI-elements/Inspira/FileUpload.vue';
+import FlipCard from '@/UI-elements/Inspira/FlipCard.vue';
+import ComboBox from '@/UI-elements/as_Inspira/ComboBox.vue';
 import { useAdminStore } from '@/stores/admin';
 import { COMPONENT_SPECS } from '@/lib/spec-definitions';
 
@@ -16,6 +18,7 @@ const activeTab = ref('components'); // 'components' | 'categories'
 const showModal = ref(false);
 const modalMode = ref('create'); // 'create' | 'edit'
 const editingId = ref(null);
+const selectedFile = ref(null);
 
 // Form Data - Component
 const compForm = ref({
@@ -86,6 +89,13 @@ const componentsWithCategoryName = computed(() => {
     }));
 });
 
+const categoryOptions = computed(() => {
+    return adminStore.categories.map(c => ({
+        label: c.name,
+        value: c.id
+    }));
+});
+
 // --- Actions ---
 
 onMounted(async () => {
@@ -95,14 +105,11 @@ onMounted(async () => {
 
 const handleImageUpload = (files) => {
     if (files && files.length > 0) {
-        // In a real scenario, FileUpload component might upload to Cloudinary directly and emit URL
-        // OR return the File object which we upload to our backend.
-        // Assuming user's FileUpload emits the file(s). 
-        // We'll need to implement the actual upload logic or assume the component returns a URL.
-        // For now, let's assume it emits a URL or we handle file upload via store later.
-        console.log("Files uploaded:", files);
-        // Placeholder: assume we get a URL or set a dummy one for now if not implemented fully
-        // compForm.value.imageUrl = "https://placehold.co/100x100"; 
+        // FileUpload component returns an array of files
+        selectedFile.value = files[0];
+        console.log("File selected:", selectedFile.value.name);
+    } else {
+        selectedFile.value = null;
     }
 };
 // NOTE: Since I don't see the internal logic of FileUpload, I'm assuming it handles the upload 
@@ -141,23 +148,37 @@ const openEditModal = (item) => {
 const resetForms = () => {
     compForm.value = { name: '', brand: '', price: '', stock: '', categoryId: null, imageUrl: '', specifications: {} };
     catForm.value = { name: '', description: '' };
+    selectedFile.value = null;
 };
 
 const handleSubmit = async () => {
     try {
         if (activeTab.value === 'components') {
-            // Create payload and remove empty imageUrl
-            const payload = { ...compForm.value };
+            // Use FormData for components to support image upload
+            const formData = new FormData();
+            // Ensure numeric fields are valid or default to 0 to avoid NaN crashes
+            formData.append('name', compForm.value.name || '');
+            formData.append('brand', compForm.value.brand || '');
+            formData.append('price', compForm.value.price || '0');
+            formData.append('stock', compForm.value.stock || '0');
             
-            // If imageUrl is empty, remove it from payload or set to null
-            if (!payload.imageUrl || payload.imageUrl.trim() === '') {
-                delete payload.imageUrl; // Remove the field entirely
+            // Send both variants to be absolutely safe against casing issues
+            const catId = compForm.value.categoryId ? String(compForm.value.categoryId) : '';
+            formData.append('categoryId', catId);
+            formData.append('categoryid', catId); 
+            
+            // Specifications must be stringified for FormData
+            const specs = compForm.value.specifications || {};
+            formData.append('specifications', JSON.stringify(specs));
+
+            if (selectedFile.value) {
+                formData.append('image', selectedFile.value);
             }
             
             if (modalMode.value === 'create') {
-                await adminStore.createComponent(payload);
+                await adminStore.createComponent(formData);
             } else {
-                await adminStore.updateComponent(editingId.value, payload);
+                await adminStore.updateComponent(editingId.value, formData);
             }
         } else {
              if (modalMode.value === 'create') {
@@ -231,21 +252,71 @@ watch(() => compForm.value.categoryId, (newVal, oldVal) => {
 
             <!-- Content Area -->
             <div v-if="activeTab === 'components'">
-                <AdminTable 
-                    :columns="componentColumns" 
-                    :data="componentsWithCategoryName" 
-                    :loading="adminStore.isLoading"
-                    actions 
-                    @edit="openEditModal"
-                    @delete="handleDelete"
-                >
-                    <template #imageUrl="{ item }">
-                        <div class="h-10 w-10 rounded bg-gray-100 overflow-hidden border border-gray-200">
-                             <img v-if="item.ImageUrl" :src="item.ImageUrl" alt="" class="h-full w-full object-cover">
-                             <div v-else class="h-full w-full flex items-center justify-center text-gray-400 text-xs">No Img</div>
+                <!-- Grid View for Components -->
+                 <div v-if="adminStore.isLoading" class="flex justify-center p-12">
+                    <Icon icon="eos-icons:loading" class="text-4xl text-yellow-500 animate-spin" />
+                </div>
+                <div v-else-if="componentsWithCategoryName.length === 0" class="text-center p-12 text-gray-500">
+                    No components found. Start by adding one!
+                </div>
+                <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <FlipCard 
+                        v-for="item in componentsWithCategoryName" 
+                        :key="item.id"
+                        class="h-80 w-full"
+                    >
+                        <!-- Front -->
+                        <div class="h-full w-full flex flex-col bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                            <div class="h-48 w-full bg-gray-100 dark:bg-zinc-800 relative">
+                                <img v-if="item.ImageUrl" :src="item.ImageUrl" alt="" class="w-full h-full object-cover">
+                                <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+                                    <Icon icon="mdi:image-off" class="text-3xl" />
+                                </div>
+                                <div class="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                                    ${{ item.price }}
+                                </div>
+                            </div>
+                            <div class="p-4 flex flex-col flex-1 justify-between">
+                                <div>
+                                    <h3 class="font-bold text-gray-900 dark:text-gray-100 truncate" :title="item.name">{{ item.name }}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ item.brand }}</p>
+                                </div>
+                                <div class="mt-2 text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded-md w-fit text-gray-600 dark:text-gray-300">
+                                    {{ item.categoryName }}
+                                </div>
+                            </div>
                         </div>
-                    </template>
-                </AdminTable>
+
+                        <!-- Back -->
+                        <template #back>
+                            <div class="h-full w-full flex flex-col justify-center items-center text-center space-y-4">
+                                <div>
+                                    <p class="text-xs text-slate-400 uppercase tracking-wider">Stock</p>
+                                    <p class="text-2xl font-bold text-yellow-500">{{ item.stock }}</p>
+                                </div>
+                                
+                                <div class="w-full h-px bg-slate-700"></div>
+                                
+                                <div class="flex gap-2">
+                                    <Button 
+                                        @click.stop="openEditModal(item)"
+                                        size="sm"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white h-9 w-9 p-0 rounded-full"
+                                    >
+                                        <Icon icon="mdi:pencil" class="text-lg" />
+                                    </Button>
+                                    <Button 
+                                        @click.stop="handleDelete(item.id)"
+                                        size="sm"
+                                        class="bg-red-500 hover:bg-red-600 text-white h-9 w-9 p-0 rounded-full"
+                                    >
+                                        <Icon icon="mdi:delete" class="text-lg" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </template>
+                    </FlipCard>
+                </div>
             </div>
 
             <div v-else>
@@ -303,16 +374,11 @@ watch(() => compForm.value.categoryId, (newVal, oldVal) => {
                                      </div>
                                      <div class="col-span-2">
                                          <label class="block text-sm font-medium mb-1">Category</label>
-                                         <select 
+                                         <ComboBox 
                                             v-model="compForm.categoryId"
-                                            class="w-full flex h-10 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:bg-slate-950 dark:text-gray-100"
-                                            required
-                                         >
-                                            <option :value="null" disabled>Select a Category</option>
-                                            <option v-for="cat in adminStore.categories" :key="cat.id" :value="cat.id">
-                                                {{ cat.name }}
-                                            </option>
-                                         </select>
+                                            :options="categoryOptions"
+                                            placeholder="Select a Category"
+                                         />
                                      </div>
                                 </div>
                             </div>
