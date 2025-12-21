@@ -6,7 +6,7 @@ import AdminTable from '@/UI-elements/as_Inspira/AdminTable.vue';
 import Input from '@/UI-elements/as_Inspira/Input.vue';
 import Button from '@/UI-elements/as_Inspira/Button.vue';
 import FileUpload from '@/UI-elements/Inspira/FileUpload.vue';
-import FlipCard from '@/UI-elements/Inspira/FlipCard.vue';
+import ProductCard from '@/UI-elements/as_Inspira/ProductCard.vue';
 import ComboBox from '@/UI-elements/as_Inspira/ComboBox.vue';
 import { useAdminStore } from '@/stores/admin';
 import { COMPONENT_SPECS } from '@/lib/spec-definitions';
@@ -205,6 +205,7 @@ const handleDelete = async (id) => {
         } else {
             await adminStore.deleteCategory(id);
         }
+        showModal.value = false; // Close modal if open
     } catch (e) {
         alert("Delete failed: " + e);
     }
@@ -260,62 +261,18 @@ watch(() => compForm.value.categoryId, (newVal, oldVal) => {
                     No components found. Start by adding one!
                 </div>
                 <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                    <FlipCard 
+                    <ProductCard 
                         v-for="item in componentsWithCategoryName" 
                         :key="item.id"
-                        class="h-80 w-full"
-                    >
-                        <!-- Front -->
-                        <div class="h-full w-full flex flex-col bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                            <div class="h-48 w-full bg-gray-100 dark:bg-zinc-800 relative">
-                                <img v-if="item.ImageUrl" :src="item.ImageUrl" alt="" class="w-full h-full object-cover">
-                                <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-                                    <Icon icon="mdi:image-off" class="text-3xl" />
-                                </div>
-                                <div class="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                                    ${{ item.price }}
-                                </div>
-                            </div>
-                            <div class="p-4 flex flex-col flex-1 justify-between">
-                                <div>
-                                    <h3 class="font-bold text-gray-900 dark:text-gray-100 truncate" :title="item.name">{{ item.name }}</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ item.brand }}</p>
-                                </div>
-                                <div class="mt-2 text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded-md w-fit text-gray-600 dark:text-gray-300">
-                                    {{ item.categoryName }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <template #back>
-                            <div class="h-full w-full flex flex-col justify-center items-center text-center space-y-4">
-                                <div>
-                                    <p class="text-xs text-slate-400 uppercase tracking-wider">Stock</p>
-                                    <p class="text-2xl font-bold text-yellow-500">{{ item.stock }}</p>
-                                </div>
-                                
-                                <div class="w-full h-px bg-slate-700"></div>
-                                
-                                <div class="flex gap-2">
-                                    <Button 
-                                        @click.stop="openEditModal(item)"
-                                        size="sm"
-                                        class="bg-yellow-500 hover:bg-yellow-600 text-white h-9 w-9 p-0 rounded-full"
-                                    >
-                                        <Icon icon="mdi:pencil" class="text-lg" />
-                                    </Button>
-                                    <Button 
-                                        @click.stop="handleDelete(item.id)"
-                                        size="sm"
-                                        class="bg-red-500 hover:bg-red-600 text-white h-9 w-9 p-0 rounded-full"
-                                    >
-                                        <Icon icon="mdi:delete" class="text-lg" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </template>
-                    </FlipCard>
+                        :name="item.name"
+                        :brand="item.brand"
+                        :price="item.price"
+                        :stock="item.stock"
+                        :category="item.categoryName"
+                        :image-url="item.ImageUrl"
+                        @click="openEditModal(item)"
+                        class="h-full w-full"
+                    />
                 </div>
             </div>
 
@@ -451,11 +408,26 @@ watch(() => compForm.value.categoryId, (newVal, oldVal) => {
 
                 </div>
 
-                <div class="p-6 border-t border-gray-100 dark:border-zinc-800 flex justify-end gap-3 sticky bottom-0 bg-white dark:bg-zinc-900 z-10 rounded-b-2xl">
-                    <Button type="button" variant="ghost" @click="showModal = false">Cancel</Button>
-                    <Button type="submit" form="modalForm" :disabled="adminStore.isLoading">
-                        {{ modalMode === 'create' ? 'Create' : 'Save Changes' }}
-                    </Button>
+                <div class="p-6 border-t border-gray-100 dark:border-zinc-800 flex justify-between items-center sticky bottom-0 bg-white dark:bg-zinc-900 z-10 rounded-b-2xl">
+                    <!-- Delete Option (only in edit mode) -->
+                    <div>
+                        <Button 
+                            v-if="modalMode === 'edit'" 
+                            type="button" 
+                            class="bg-white text-red-600 hover:bg-red-100 hover:text-red-700 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+                            @click="handleDelete(editingId)"
+                        >
+                            <Icon icon="mdi:delete" class="mr-2" />
+                            Delete
+                        </Button>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <Button type="button" variant="ghost" @click="showModal = false">Cancel</Button>
+                        <Button type="submit" form="modalForm" :disabled="adminStore.isLoading">
+                            {{ modalMode === 'create' ? 'Create' : 'Save Changes' }}
+                        </Button>
+                    </div>
                 </div>
 
             </div>
