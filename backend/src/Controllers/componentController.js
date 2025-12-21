@@ -79,6 +79,60 @@ export const getComponentById = async (req, res) => {
     }
 };
 
+
+// ================ component par catégorie 
+export const getComponentsByCategory = async (req, res) => {
+    const { categoryId } = req.params;
+
+    try {
+        const components = await prismaClient.component.findMany({ 
+            where: { 
+                categoryId: parseInt(categoryId) 
+            },
+            include: { category: true }
+        });
+
+        
+        if (components.length === 0) {
+            return res.status(404).json({ message: "Aucun composant trouvé pour cette catégorie" });
+        }
+
+        res.status(200).json(components);
+    } catch (error) {
+        console.error(error); // Important pour voir l'erreur dans le terminal
+        res.status(500).json({ error: "Erreur lors de la récupération par catégorie" });
+    }
+};
+
+//========================les 10 derniers components 
+export const getRecentComponents = async (req, res) => {
+    try {
+        const recentComponents = await prismaClient.component.findMany({
+            // 1. Trier par date de création (descendant = du plus récent au plus vieux)
+            orderBy: {
+                createdAt: 'desc' 
+            },
+            // 2. Limiter à 10 résultats
+            take: 10,
+            
+            // 3. (Optionnel) Filtrer pour ne prendre que les produits actifs
+            where: {
+                isActive: true
+            },
+            
+            // 4. Inclure la catégorie pour l'affichage
+            include: {
+                category: true
+            }
+        });
+
+        res.status(200).json(recentComponents);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erreur lors de la récupération des nouveautés" });
+    }
+};
+
 // ==========================================
 // 4. MODIFIER UN COMPOSANT (PUT)
 // ==========================================
