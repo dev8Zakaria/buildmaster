@@ -1,7 +1,7 @@
 import express from "express";  
 
 import {
-     getProducts,getProductById 
+     getProducts,getProductById
       
                  } from "../../Controllers/client/productController.js";      
 
