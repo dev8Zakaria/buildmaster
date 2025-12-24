@@ -1,13 +1,13 @@
 import express from 'express';
-import { isAdmin } from '../Midllewars/isRole.js';
-import { authMidlleware } from '../Midllewars/authMidlleware.js';
+import { isAdmin } from '../../Midllewars/isRole.js';
+import { authMidlleware } from '../../Midllewars/authMidlleware.js';
 import { 
     createCategory, 
     getAllCategories, 
     getCategoryById, 
     updateCategory, 
     deleteCategory 
-} from '../Controllers/categoryController.js';
+} from '../../Controllers/admin/categoryController.js';
 
 const router = express.Router();
 

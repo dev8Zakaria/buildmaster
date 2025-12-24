@@ -1,4 +1,4 @@
-import prismaClient from '../Config/prisma.js';
+import prismaClient from '../../Config/prisma.js';
 
 // ==========================================
 // 1. CRÉER UNE CATÉGORIE

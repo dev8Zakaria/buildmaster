@@ -1,7 +1,7 @@
 import express from 'express';
-import { upload } from '../Midllewars/cloudinary.js';
-import { isAdmin } from '../Midllewars/isRole.js';
-import { authMidlleware } from '../Midllewars/authMidlleware.js';
+import { upload } from "../../Midllewars/cloudinary.js";
+import { isAdmin } from '../../Midllewars/isRole.js';
+import { authMidlleware } from '../../Midllewars/authMidlleware.js';
 import { 
     createComponent, 
     getAllComponents, 
@@ -10,7 +10,7 @@ import {
     getRecentComponents,
     updateComponent, 
     deleteComponent 
-} from '../Controllers/componentController.js';
+} from '../../Controllers/admin/componentController.js';
 
 const router = express.Router();
 

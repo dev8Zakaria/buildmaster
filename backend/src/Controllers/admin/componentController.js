@@ -1,5 +1,5 @@
-import prismaClient from '../Config/prisma.js';
-import { removeImageFromCloudinary } from '../Midllewars/cloudinary.js';
+import prismaClient from '../../Config/prisma.js';
+import { removeImageFromCloudinary } from '../../Utils/cloudinary.js';
 
 // 1. CRÉER UN COMPOSANT (POST)
 // ==========================================
