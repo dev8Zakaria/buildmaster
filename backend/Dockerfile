@@ -2,7 +2,7 @@ FROM node:20-alpine
 
 WORKDIR /usr/src/app
 
-# Fix DNS + install native build deps
+# Fix DNS + install native build deps (!!!!!!!!!!!!!!! c'est just pour que la version de certains dependences travail sur linux OS)
 RUN apk update && apk add --no-cache \
     python3 \
     build-base \
