@@ -1,18 +1,26 @@
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted } from 'vue';
 import { useCatalogStore } from '@/stores/catalog';
 import { useAuthStore } from '@/stores/auth';
+import { useCartStore } from '@/stores/cart';
 import { useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import ProductCard from '@/UI-elements/as_Inspira/ProductCard.vue';
 import Button from '@/UI-elements/as_Inspira/Button.vue';
+import CartDropdown from '@/components/cart/CartDropdown.vue';
+import AddToCartModal from '@/components/cart/AddToCartModal.vue';
 
 const catalogStore = useCatalogStore();
 const authStore = useAuthStore();
+const cartStore = useCartStore();
 const router = useRouter();
 
 onMounted(async () => {
     await catalogStore.initHome();
+    // Fetch cart if logged in
+    if (authStore.token) {
+        cartStore.fetchCart();
+    }
 });
 
 const handleCategoryClick = (id) => {
@@ -24,9 +32,31 @@ const handleProductClick = (item) => {
     console.log('Product clicked:', item.name);
 };
 
+const handleAddToCart = async (item) => {
+    // Check if user is logged in
+    if (!authStore.token) {
+        // Store intended action and redirect to login
+        router.push('/login');
+        return;
+    }
+
+    // Add to cart
+    const result = await cartStore.addToCart(item.id);
+    if (result.success) {
+        // Show success modal
+        cartStore.showModal(item);
+    } else {
+        alert('Failed to add to cart: ' + result.error);
+    }
+};
+
 // Helper to check if a category is selected
 const isSelected = (id) => catalogStore.selectedCategoryId === id;
 
+const handleLogout = () => {
+    authStore.logout();
+    router.push('/login');
+};
 </script>
 
 <template>
@@ -45,12 +75,23 @@ const isSelected = (id) => catalogStore.selectedCategoryId === id;
             </div>
 
             <div class="flex items-center gap-4">
+                <!-- Cart Icon (for logged in users) -->
+                <CartDropdown v-if="authStore.token" />
+
                 <template v-if="authStore.user">
-                    <span class="text-sm hidden sm:inline-block">Hi, {{ authStore.user.firstName }}</span>
-                     <router-link to="/admin" v-if="authStore.user.role === 'Admin'">
+                    <div class="hidden sm:flex items-center gap-2">
+                        <div class="h-8 w-8 rounded-full bg-yellow-100 dark:bg-yellow-900/50 flex items-center justify-center text-yellow-600 dark:text-yellow-400 font-bold text-sm">
+                            {{ authStore.user.firstName?.charAt(0) || 'U' }}
+                        </div>
+                        <span class="text-sm font-medium">{{ authStore.user.firstName }}</span>
+                    </div>
+                    <router-link to="/admin" v-if="authStore.user.role === 'Admin'">
                         <Button size="sm">Dashboard</Button>
                     </router-link>
-                     <Button v-else size="sm" variant="outline" @click="authStore.logout(); router.push('/login')">Logout</Button>
+                    <Button v-else size="sm" variant="ghost" @click="handleLogout">
+                        <Icon icon="mdi:logout" class="mr-1" />
+                        Logout
+                    </Button>
                 </template>
                 <template v-else>
                     <router-link to="/login">
@@ -64,38 +105,37 @@ const isSelected = (id) => catalogStore.selectedCategoryId === id;
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-6 space-y-16 py-12">
+    <main class="max-w-7xl mx-auto p-6 space-y-12 py-8">
         
         <!-- Hero Section -->
-        <section class="text-center space-y-4 py-8">
-            <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight">
+        <section class="text-center space-y-4 py-6">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">
                 Upgrade Your <span class="text-yellow-500">Battlestation</span>
             </h1>
-            <p class="text-xl text-gray-500 max-w-2xl mx-auto">
+            <p class="text-lg text-gray-500 max-w-2xl mx-auto">
                 Premium components for the ultimate gaming experience.
             </p>
         </section>
 
         <!-- Section 1: New Arrivals -->
         <section>
-            <div class="flex items-center gap-3 mb-6">
-                 <Icon icon="mdi:sparkles" class="text-yellow-500 text-2xl" />
-                <h2 class="text-2xl font-bold">New Arrivals</h2>
+            <div class="flex items-center gap-3 mb-4">
+                 <Icon icon="mdi:sparkles" class="text-yellow-500 text-xl" />
+                <h2 class="text-xl font-bold">New Arrivals</h2>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                  <ProductCard 
                     v-for="item in catalogStore.recentProducts" 
                     :key="item.id"
-                    v-bind="{
-                        name: item.name,
-                        brand: item.brand,
-                        price: item.price,
-                        stock: item.stock,
-                        category: item.category?.name || 'Unknown',
-                        imageUrl: item.ImageUrl
-                    }"
+                    :name="item.name"
+                    :brand="item.brand"
+                    :price="item.price"
+                    :stock="item.stock"
+                    :category="item.category?.name || 'Unknown'"
+                    :image-url="item.ImageUrl"
                     @click="handleProductClick(item)"
+                    @add-to-cart="handleAddToCart(item)"
                 />
             </div>
              <div v-if="catalogStore.recentProducts.length === 0" class="text-center py-8 text-gray-500">
@@ -104,11 +144,11 @@ const isSelected = (id) => catalogStore.selectedCategoryId === id;
         </section>
 
         <!-- Section 2: Shop by Category -->
-        <section class="bg-white dark:bg-zinc-900/50 p-8 rounded-3xl border border-gray-100 dark:border-zinc-800/50">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <section class="bg-white dark:bg-zinc-900/50 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800/50">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div class="flex items-center gap-3">
-                     <Icon icon="mdi:filter-variant" class="text-yellow-500 text-2xl" />
-                    <h2 class="text-2xl font-bold">Shop by Category</h2>
+                     <Icon icon="mdi:filter-variant" class="text-yellow-500 text-xl" />
+                    <h2 class="text-xl font-bold">Shop by Category</h2>
                 </div>
                 
                 <!-- Category Pills -->
@@ -117,7 +157,7 @@ const isSelected = (id) => catalogStore.selectedCategoryId === id;
                         v-for="cat in catalogStore.categories" 
                         :key="cat.id"
                         @click="handleCategoryClick(cat.id)"
-                        class="px-4 py-2 rounded-full text-sm font-medium transition-all"
+                        class="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                         :class="isSelected(cat.id) ? 'bg-yellow-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-300'"
                     >
                         {{ cat.name }}
@@ -126,46 +166,44 @@ const isSelected = (id) => catalogStore.selectedCategoryId === id;
             </div>
 
             <!-- Filtered Grid -->
-             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                  <ProductCard 
                     v-for="item in catalogStore.categoryProducts" 
                     :key="item.id"
-                     v-bind="{
-                        name: item.name,
-                        brand: item.brand,
-                        price: item.price,
-                        stock: item.stock,
-                        category: item.category?.name || 'Unknown',
-                        imageUrl: item.ImageUrl
-                    }"
+                    :name="item.name"
+                    :brand="item.brand"
+                    :price="item.price"
+                    :stock="item.stock"
+                    :category="item.category?.name || 'Unknown'"
+                    :image-url="item.ImageUrl"
                     @click="handleProductClick(item)"
+                    @add-to-cart="handleAddToCart(item)"
                 />
             </div>
-             <div v-if="catalogStore.categoryProducts.length === 0" class="text-center py-12 text-gray-500">
-                select a category to view products.
+             <div v-if="catalogStore.categoryProducts.length === 0" class="text-center py-8 text-gray-500">
+                Select a category to view products.
             </div>
         </section>
 
         <!-- Section 3: All Products -->
         <section>
-            <div class="flex items-center gap-3 mb-6">
-                 <Icon icon="mdi:view-grid" class="text-yellow-500 text-2xl" />
-                <h2 class="text-2xl font-bold">All Products</h2>
+            <div class="flex items-center gap-3 mb-4">
+                 <Icon icon="mdi:view-grid" class="text-yellow-500 text-xl" />
+                <h2 class="text-xl font-bold">All Products</h2>
             </div>
 
-             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                  <ProductCard 
                     v-for="item in catalogStore.allProducts" 
                     :key="item.id"
-                     v-bind="{
-                        name: item.name,
-                        brand: item.brand,
-                        price: item.price,
-                        stock: item.stock,
-                        category: item.category?.name || 'Unknown',
-                        imageUrl: item.ImageUrl
-                    }"
+                    :name="item.name"
+                    :brand="item.brand"
+                    :price="item.price"
+                    :stock="item.stock"
+                    :category="item.category?.name || 'Unknown'"
+                    :image-url="item.ImageUrl"
                     @click="handleProductClick(item)"
+                    @add-to-cart="handleAddToCart(item)"
                 />
             </div>
         </section>
@@ -173,11 +211,15 @@ const isSelected = (id) => catalogStore.selectedCategoryId === id;
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white dark:bg-zinc-950 border-t border-gray-200 dark:border-zinc-900 py-12 mt-12">
+    <footer class="bg-white dark:bg-zinc-950 border-t border-gray-200 dark:border-zinc-900 py-8 mt-8">
         <div class="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
             <p>&copy; {{ new Date().getFullYear() }} Build Master. All rights reserved.</p>
         </div>
     </footer>
 
+    <!-- Add to Cart Modal -->
+    <AddToCartModal />
+
   </div>
 </template>
+
