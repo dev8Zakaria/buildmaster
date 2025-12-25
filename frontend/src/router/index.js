@@ -28,24 +28,9 @@ const routes = [
         ]
     },
     {
-        path: '/customer',
-        children: [
-            {
-                path: '',
-                name: 'Home',
-                component: Home
-            }
-        ]
-    },
-    {
         path: '/',
-        redirect: to => {
-            const authStore = useAuthStore();
-            if (authStore.user?.role === 'Admin') {
-                return '/admin';
-            }
-            return '/customer';
-        }
+        name: 'Home',
+        component: Home
     }
 ];
 
@@ -72,16 +57,13 @@ router.beforeEach((to, from, next) => {
         // Simplified check:
         const requiredRole = to.matched.find(r => r.meta.role)?.meta.role;
         if (requiredRole && authStore.user?.role !== requiredRole) {
-            next('/customer'); // Redirect unauthorized access to customer home
+            next('/'); // Redirect unauthorized access to home
             return;
         }
     }
 
-    // Prevent Admin from accessing customer routes if you want strict separation?
-    // User only asked for "admin skips home".
-    // If admin visits /customer, should they be kicked to /admin?
-    // "go staight forward to his admin dashboard, he does not neeed the home page"
-    if (to.path.startsWith('/customer') && authStore.user?.role === 'Admin') {
+    // Redirect Admin to Dashboard if trying to access Home
+    if (to.path === '/' && authStore.user?.role === 'Admin') {
         next('/admin');
         return;
     }
