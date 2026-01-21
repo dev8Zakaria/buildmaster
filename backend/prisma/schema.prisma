@@ -25,6 +25,7 @@ model User {
   password  String
   role  Role @default(Customer)
   orders Order[]
+  SavedBuilds SavedBuild[]
   @@map("users")
 }
 
@@ -42,6 +43,7 @@ model Component {
   // Relations
   categoryId     Int
   category       Category  @relation(fields: [categoryId], references: [id])
+  SavedBuilds   SavedBuild[]
   
   orderItems     OrderItem[]
 
@@ -85,4 +87,20 @@ model OrderItem {
  
   @@unique([orderId, componentId])
   @@map("order_items")
+}
+
+model SavedBuild {
+  id          Int       @id @default(autoincrement())
+  name        String
+  createdAt   DateTime  @default(now())
+  total_price       Decimal   @db.Decimal(10, 2)
+  
+  // Relations
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  
+  components  Component[]
+
+  @@unique([userId, name])
+  @@map("saved_builds")
 }

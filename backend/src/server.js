@@ -9,11 +9,9 @@ import component from './Routes/admin/component.js'
 import cart from "./Routes/client/cart.js";
 import order from "./Routes/client/orders.js";
 
-
-
+import pcBuild from "./Routes/client/pcBuild.js";
 
 dotenv.config();
-
 
 const app = express();
 
@@ -36,6 +34,7 @@ app.use('/api/category',category);
 app.use("/api/cart", cart); 
 app.use("/api/orders", order); // Routes pour afficher l historique des commandes
 
+app.use("/api/pcBuild", pcBuild); // Routes pour le PC Builder
 
 
 

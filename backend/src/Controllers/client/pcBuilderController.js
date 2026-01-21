@@ -1,0 +1,72 @@
+import prisma from "../../Config/prisma.js";
+import { Prisma } from "@prisma/client";
+
+export const getComponentsForStep = async (req, res) => {
+  try {
+    const { categoryName } = req.params; // ex: "CPU", "GPU", "RAM"
+
+    const components = await prisma.component.findMany({
+      where: {
+        category: {
+          name: { equals: categoryName, mode: 'insensitive' }
+        },
+        isActive: true,
+        stock: { gt: 0 }
+      },
+      select: {
+        id: true,
+        name: true,
+        brand: true,
+        price: true,
+        ImageUrl: true,
+        specifications: true // Contient le Socket, TDP, etc., pour l'affichage
+      }
+    });
+
+    if (components.length === 0) {
+      return res.status(404).json({ message: `Aucun composant trouvé pour la catégorie ${categoryName}` });
+    }
+
+    res.status(200).json(components);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la récupération des composants." });
+  }
+};
+
+export const saveCompleteBuild = async (req, res) => {
+  try {
+    const { name, componentIds } = req.body;
+    const userId = req.user.id; // Extrait du token JWT
+
+    // 1. Vérification et récupération des prix actuels en DB
+    const selectedComponents = await prisma.component.findMany({
+      where: { id: { in: componentIds } }
+    });
+
+    // 2. Calcul sécurisé du prix total côté serveur
+    const totalPrice = selectedComponents.reduce(
+      (acc, comp) => acc.add(comp.price), 
+      new Prisma.Decimal(0)
+    );
+
+    // 3. Création du SavedBuild avec les relations
+    const newBuild = await prisma.savedBuild.create({
+      data: {
+        name: name,
+        total_price: totalPrice,
+        userId: userId,
+        components: {
+          connect: componentIds.map(id => ({ id }))
+        }
+      }
+    });
+
+    res.status(201).json({ message: "Build sauvegardé !", data: newBuild });
+  } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(400).json({ message: "Un build avec ce nom existe déjà pour votre compte." });
+    }
+    res.status(500).json({ message: "Erreur serveur lors de la sauvegarde." });
+  }
+};
+
