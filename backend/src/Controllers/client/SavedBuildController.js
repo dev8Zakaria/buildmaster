@@ -10,10 +10,10 @@ export const getAllSavedBuilds = async (req, res) => {
         userId: userId
       },
       select: {
+        id: true,
         name: true,
         total_price: true,
         createdAt: true
-        // On ne sélectionne PAS 'id' ou 'components' ici pour alléger la réponse
       },
       orderBy: {
         createdAt: 'desc'
@@ -75,7 +75,7 @@ export const updateSavedBuild = async (req, res) => {
     });
 
     const newTotalPrice = components.reduce(
-      (acc, comp) => acc.add(comp.price), 
+      (acc, comp) => acc.add(comp.price),
       new Prisma.Decimal(0)
     );
 
@@ -123,8 +123,8 @@ export const deleteSavedBuild = async (req, res) => {
     });
 
     if (!build) {
-      return res.status(404).json({ 
-        message: "Build non trouvé ou vous n'avez pas l'autorisation de le supprimer." 
+      return res.status(404).json({
+        message: "Build non trouvé ou vous n'avez pas l'autorisation de le supprimer."
       });
     }
 

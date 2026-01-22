@@ -13,6 +13,8 @@ import {
   saveCompleteBuild
 } from "../../Controllers/client/pcBuilderController.js";
 
+const router = express.Router();
+
 // Public : Tout le monde peut voir les composants pour tester le configurateur
 router.get('/step/:categoryName', getComponentsForStep);
 
@@ -38,4 +40,4 @@ router.delete('/:id', deleteSavedBuild);
 // Transfert vers le panier
 router.post('/:buildId/transfer', transferBuildToOrder);
 
-module.exports = router;
+export default router;

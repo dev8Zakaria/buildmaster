@@ -4,6 +4,8 @@ import SignIn from '../views/auth/SignIn.vue';
 import SignUp from '../views/auth/SignUp.vue';
 import AdminDashboard from '../views/admin/AdminDashboard.vue';
 import Checkout from '../views/Checkout.vue';
+import PCBuilder from '../views/PCBuilder.vue';
+import SavedBuilds from '../views/SavedBuilds.vue';
 import { useAuthStore } from '@/stores/auth';
 
 const routes = [
@@ -32,6 +34,17 @@ const routes = [
         path: '/checkout',
         name: 'Checkout',
         component: Checkout,
+        meta: { requiresAuth: true, role: 'Customer' }
+    },
+    {
+        path: '/builder',
+        name: 'PCBuilder',
+        component: PCBuilder
+    },
+    {
+        path: '/saved-builds',
+        name: 'SavedBuilds',
+        component: SavedBuilds,
         meta: { requiresAuth: true, role: 'Customer' }
     },
     {

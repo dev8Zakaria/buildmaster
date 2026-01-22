@@ -75,6 +75,20 @@ const handleLogout = () => {
             </div>
 
             <div class="flex items-center gap-4">
+                <!-- PC Builder Links -->
+                <router-link to="/builder">
+                    <Button variant="ghost" size="sm">
+                        <Icon icon="mdi:hammer-wrench" class="mr-1" />
+                        Build PC
+                    </Button>
+                </router-link>
+                <router-link to="/saved-builds" v-if="authStore.token && authStore.user?.role === 'Customer'">
+                    <Button variant="ghost" size="sm">
+                        <Icon icon="mdi:folder-heart" class="mr-1" />
+                        My Builds
+                    </Button>
+                </router-link>
+
                 <!-- Cart Icon (for logged in users) -->
                 <CartDropdown v-if="authStore.token" />
 
