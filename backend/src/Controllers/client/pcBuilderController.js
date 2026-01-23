@@ -3,6 +3,71 @@ import { Prisma } from "@prisma/client";
 
 export const getComponentsForStep = async (req, res) => {
   try {
+    const { categoryName } = req.params;
+    // Récupération des IDs déjà sélectionnés envoyés par le frontend
+    const { cpuId, moboId, gpuId } = req.query;
+
+    let filters = {
+      category: { name: { equals: categoryName, mode: 'insensitive' } },
+      isActive: true,
+      stock: { gt: 0 }
+    };
+
+    // --- LOGIQUE DE COMPATIBILITÉ ---
+
+    // Étape 2 : Filtrer les Cartes Mères par rapport au CPU
+    if (categoryName.toLowerCase() === 'motherboard' && cpuId) {
+      const cpu = await prisma.component.findUnique({ where: { id: cpuId } });
+      if (cpu) {
+        filters.specifications = { path: ['socket'], equals: cpu.specifications.socket };
+      }
+    }
+
+    // Étape 3 : Filtrer la RAM par rapport à la Carte Mère
+    if (categoryName.toLowerCase() === 'ram' && moboId) {
+      const mobo = await prisma.component.findUnique({ where: { id: moboId } });
+      if (mobo) {
+        filters.specifications = { path: ['type'], equals: mobo.specifications.ramType };
+      }
+    }
+
+    // Étape 6 : Filtrer l'Alimentation par rapport au CPU + GPU
+    if (categoryName.toLowerCase() === 'psu' && cpuId && gpuId) {
+      const cpu = await prisma.component.findUnique({ where: { id: cpuId } });
+      const gpu = await prisma.component.findUnique({ where: { id: gpuId } });
+      if (cpu && gpu) {
+        const minWattage = (cpu.specifications.tdp + gpu.specifications.tdp) * 1.5;
+        filters.specifications = { path: ['wattage'], gte: minWattage };
+      }
+    }
+
+    // Étape 7 : Filtrer le Boîtier par rapport à la Carte Mère + GPU
+    if (categoryName.toLowerCase() === 'case' && moboId && gpuId) {
+      const mobo = await prisma.component.findUnique({ where: { id: moboId } });
+      const gpu = await prisma.component.findUnique({ where: { id: gpuId } });
+      if (mobo && gpu) {
+        filters.AND = [
+          { specifications: { path: ['supportedMobo'], array_contains: mobo.specifications.format } },
+          { specifications: { path: ['maxGPULength'], gte: gpu.specifications.length } }
+        ];
+      }
+    }
+
+    const components = await prisma.component.findMany({
+      where: filters,
+      include: { category: true }
+    });
+
+    res.status(200).json(components);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors du filtrage des composants." });
+  }
+};
+
+/*
+export const getComponentsForStep = async (req, res) => {
+  try {
     const { categoryName } = req.params; // ex: "CPU", "GPU", "RAM"
 
     const components = await prisma.component.findMany({
@@ -31,7 +96,8 @@ export const getComponentsForStep = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la récupération des composants." });
   }
-};
+}; 
+*/
 
 export const saveCompleteBuild = async (req, res) => {
   try {
