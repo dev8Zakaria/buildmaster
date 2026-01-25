@@ -53,8 +53,8 @@ export const COMPONENT_SPECS = {
     ],
     'Boîtiers': [
         { key: 'type', label: 'Type', type: 'text', placeholder: 'e.g., Mid Tower' },
-        { key: 'motherboardSupport', label: 'MB Support', type: 'text', placeholder: 'e.g., ATX, mATX, ITX' },
-        { key: 'maxGpuLength', label: 'Max GPU Length', type: 'text', placeholder: 'e.g., 400 mm' },
+        { key: 'motherboardSupport', label: 'MB Support', type: 'array', placeholder: 'e.g., ATX, mATX, ITX' },
+        { key: 'maxGPULength', label: 'Max GPU Length', type: 'text', placeholder: 'e.g., 400 mm' },
         { key: 'maxCpuCoolerHeight', label: 'Max CPU Cooler', type: 'text', placeholder: 'e.g., 170 mm' },
         { key: 'includedFans', label: 'Included Fans', type: 'text', placeholder: 'e.g., 3x 120mm ARGB' },
         { key: 'radiatorSupport', label: 'Radiator Support', type: 'text', placeholder: 'e.g., Up to 360mm Top/Front' }

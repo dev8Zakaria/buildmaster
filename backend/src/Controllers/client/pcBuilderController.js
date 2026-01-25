@@ -15,8 +15,10 @@ export const getComponentsForStep = async (req, res) => {
 
     // --- LOGIQUE DE COMPATIBILITÉ ---
 
+    const cat = categoryName.toLowerCase();
+
     // Étape 2 : Filtrer les Cartes Mères par rapport au CPU
-    if (categoryName.toLowerCase() === 'motherboard' && cpuId) {
+    if ((cat === 'motherboard' || cat === 'cartes mères') && cpuId) {
       const cpu = await prisma.component.findUnique({ where: { id: cpuId } });
       if (cpu) {
         filters.specifications = { path: ['socket'], equals: cpu.specifications.socket };
@@ -24,15 +26,15 @@ export const getComponentsForStep = async (req, res) => {
     }
 
     // Étape 3 : Filtrer la RAM par rapport à la Carte Mère
-    if (categoryName.toLowerCase() === 'ram' && moboId) {
+    if ((cat === 'ram' || cat === 'mémoire ram') && moboId) {
       const mobo = await prisma.component.findUnique({ where: { id: moboId } });
       if (mobo) {
-        filters.specifications = { path: ['type'], equals: mobo.specifications.ramType };
+        filters.specifications = { path: ['type'], equals: mobo.specifications.memoryType };
       }
     }
 
     // Étape 6 : Filtrer l'Alimentation par rapport au CPU + GPU
-    if (categoryName.toLowerCase() === 'psu' && cpuId && gpuId) {
+    if ((cat === 'psu' || cat === 'alimentation') && cpuId && gpuId) {
       const cpu = await prisma.component.findUnique({ where: { id: cpuId } });
       const gpu = await prisma.component.findUnique({ where: { id: gpuId } });
       if (cpu && gpu) {
@@ -42,12 +44,12 @@ export const getComponentsForStep = async (req, res) => {
     }
 
     // Étape 7 : Filtrer le Boîtier par rapport à la Carte Mère + GPU
-    if (categoryName.toLowerCase() === 'case' && moboId && gpuId) {
+    if ((cat === 'case' || cat === 'boîtiers') && moboId && gpuId) {
       const mobo = await prisma.component.findUnique({ where: { id: moboId } });
       const gpu = await prisma.component.findUnique({ where: { id: gpuId } });
       if (mobo && gpu) {
         filters.AND = [
-          { specifications: { path: ['supportedMobo'], array_contains: mobo.specifications.format } },
+          { specifications: { path: ['motherboardSupport'], array_contains: mobo.specifications.formFactor } },
           { specifications: { path: ['maxGPULength'], gte: gpu.specifications.length } }
         ];
       }
@@ -111,7 +113,7 @@ export const saveCompleteBuild = async (req, res) => {
 
     // 2. Calcul sécurisé du prix total côté serveur
     const totalPrice = selectedComponents.reduce(
-      (acc, comp) => acc.add(comp.price), 
+      (acc, comp) => acc.add(comp.price),
       new Prisma.Decimal(0)
     );
 

@@ -135,7 +135,16 @@ const openEditModal = (item) => {
             stock: item.stock,
             categoryId: item.categoryId,
             imageUrl: item.ImageUrl, // Note casing from API
-            specifications: item.specifications || {}
+            specifications: (() => {
+                const specs = { ...item.specifications } || {};
+                // Convert arrays back to comma-separated strings for display
+                Object.keys(specs).forEach(key => {
+                    if (Array.isArray(specs[key])) {
+                        specs[key] = specs[key].join(', ');
+                    }
+                });
+                return specs;
+            })()
         };
     } else {
         catForm.value = {
@@ -168,7 +177,15 @@ const handleSubmit = async () => {
             formData.append('categoryid', catId); 
             
             // Specifications must be stringified for FormData
-            const specs = compForm.value.specifications || {};
+            const specs = { ...compForm.value.specifications } || {};
+            
+            // Convert 'array' type specs from comma-separated string to actual Array
+            currentSpecs.value.forEach(def => {
+                if (def.type === 'array' && typeof specs[def.key] === 'string') {
+                    specs[def.key] = specs[def.key].split(',').map(s => s.trim()).filter(s => s);
+                }
+            });
+
             formData.append('specifications', JSON.stringify(specs));
 
             if (selectedFile.value) {
