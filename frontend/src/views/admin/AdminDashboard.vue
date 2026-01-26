@@ -177,12 +177,28 @@ const handleSubmit = async () => {
             formData.append('categoryid', catId); 
             
             // Specifications must be stringified for FormData
-            const specs = { ...compForm.value.specifications } || {};
-            
-            // Convert 'array' type specs from comma-separated string to actual Array
+            // STRICT FILTERING: Only include keys defined in currentSpecs
+            // This removes "Ghost Data" (old keys) and enforces types
+            const specs = {};
+            const sourceSpecs = compForm.value.specifications || {};
+
             currentSpecs.value.forEach(def => {
-                if (def.type === 'array' && typeof specs[def.key] === 'string') {
-                    specs[def.key] = specs[def.key].split(',').map(s => s.trim()).filter(s => s);
+                let value = sourceSpecs[def.key];
+                
+                // Only include if value exists
+                if (value !== undefined && value !== null && value !== '') {
+                    // Logic for Array (String -> Array)
+                    if (def.type === 'array' && typeof value === 'string') {
+                        value = value.split(',').map(s => s.trim()).filter(s => s);
+                    } 
+                    // Logic for Number (String -> Number)
+                    else if (def.type === 'number') {
+                        const num = parseFloat(value);
+                        if (!isNaN(num)) value = num;
+                    }
+                    // Text is passed as-is
+                    
+                    specs[def.key] = value;
                 }
             });
 
