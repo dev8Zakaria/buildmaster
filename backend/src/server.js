@@ -10,31 +10,33 @@ import cart from "./Routes/client/cart.js";
 import order from "./Routes/client/orders.js";
 
 import pcBuild from "./Routes/client/pcBuild.js";
+import chatbot from "./Routes/client/chatbot.js";
 
 dotenv.config();
 
 const app = express();
 
- app.get("/", (req, res) => {
-   res.send("API is running");
+app.get("/", (req, res) => {
+  res.send("API is running");
 });
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended:false}))
+app.use(express.urlencoded({ extended: false }))
 
 
 
 
-app.use('/api',auth);
-app.use('/api/component',component);
-app.use('/api/category',category);
+app.use('/api', auth);
+app.use('/api/component', component);
+app.use('/api/category', category);
 
 
-app.use("/api/cart", cart); 
+app.use("/api/cart", cart);
 app.use("/api/orders", order); // Routes pour afficher l historique des commandes
 
 app.use("/api/pcBuild", pcBuild); // Routes pour le PC Builder
+app.use("/api/chat", chatbot); // AI Chatbot Route
 
 
 
