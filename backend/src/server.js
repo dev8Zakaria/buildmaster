@@ -21,8 +21,22 @@ app.get("/", (req, res) => {
 });
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "*",
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      "http://localhost:5173",
+      "https://buildmaster-fawn.vercel.app"
+    ].map(url => url?.replace(/\/$/, "")); // Remove trailing slashes
+
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
+      callback(null, true);
+    } else {
+      console.warn(`[CORS] Rejected origin: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
