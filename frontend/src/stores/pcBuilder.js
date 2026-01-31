@@ -23,7 +23,7 @@ export const usePCBuilderStore = defineStore('pcBuilder', () => {
     const error = ref(null);
 
     const api = axios.create({
-        baseURL: 'http://localhost:3000/api'
+        baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
     });
 
     // JWT Auth interceptor
@@ -68,7 +68,10 @@ export const usePCBuilderStore = defineStore('pcBuilder', () => {
 
             if (selectedParts.value.cpu) params.append('cpuId', selectedParts.value.cpu.id);
             if (selectedParts.value.motherboard) params.append('moboId', selectedParts.value.motherboard.id);
+            if (selectedParts.value.ram) params.append('ramId', selectedParts.value.ram.id);
             if (selectedParts.value.gpu) params.append('gpuId', selectedParts.value.gpu.id);
+            if (selectedParts.value.storage) params.append('storageId', selectedParts.value.storage.id);
+            if (selectedParts.value.psu) params.append('psuId', selectedParts.value.psu.id);
 
             const response = await api.get(`/pcBuild/step/${encodeURIComponent(categoryName)}?${params.toString()}`);
             availableComponents.value = response.data;

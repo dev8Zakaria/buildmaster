@@ -60,10 +60,10 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-black font-sans text-gray-900 dark:text-gray-100">
+  <div class="min-h-screen bg-gray-50 text-gray-900 font-sans antialiased">
     
     <!-- Navbar -->
-    <header class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50">
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
                  <div class="bg-yellow-500 rounded-lg p-1.5 rotate-3">
@@ -94,7 +94,7 @@ const handleLogout = () => {
 
                 <template v-if="authStore.user">
                     <div class="hidden sm:flex items-center gap-2">
-                        <div class="h-8 w-8 rounded-full bg-yellow-100 dark:bg-yellow-900/50 flex items-center justify-center text-yellow-600 dark:text-yellow-400 font-bold text-sm">
+                        <div class="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 font-bold text-sm">
                             {{ authStore.user.firstName?.charAt(0) || 'U' }}
                         </div>
                         <span class="text-sm font-medium">{{ authStore.user.firstName }}</span>
@@ -158,7 +158,7 @@ const handleLogout = () => {
         </section>
 
         <!-- Section 2: Shop by Category -->
-        <section class="bg-white dark:bg-zinc-900/50 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800/50">
+        <section class="bg-white p-6 rounded-2xl border border-gray-100">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div class="flex items-center gap-3">
                      <Icon icon="mdi:filter-variant" class="text-yellow-500 text-xl" />
@@ -172,7 +172,7 @@ const handleLogout = () => {
                         :key="cat.id"
                         @click="handleCategoryClick(cat.id)"
                         class="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                        :class="isSelected(cat.id) ? 'bg-yellow-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-300'"
+                        :class="isSelected(cat.id) ? 'bg-yellow-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                     >
                         {{ cat.name }}
                     </button>
@@ -225,7 +225,7 @@ const handleLogout = () => {
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white dark:bg-zinc-950 border-t border-gray-200 dark:border-zinc-900 py-8 mt-8">
+    <footer class="bg-white border-t border-gray-200 py-8 mt-8">
         <div class="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
             <p>&copy; {{ new Date().getFullYear() }} Build Master. All rights reserved.</p>
         </div>

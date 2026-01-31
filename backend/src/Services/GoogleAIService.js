@@ -12,7 +12,7 @@ export const initGoogleAI = () => {
     genAI = new GoogleGenerativeAI(apiKey);
     // Use gemini-1.5-flash for speed and cost-effectiveness (free tier compatible)
     model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    console.log("Google AI Service: Initialized with gemini-1.5-flash");
+    console.log("Google AI Service: Initialized with gemini-2.5-flash");
 };
 
 export const generateText = async (prompt) => {

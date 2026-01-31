@@ -92,10 +92,10 @@ const isCurrentPartSelected = computed(() => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-black font-sans text-gray-900 dark:text-gray-100">
+    <div class="min-h-screen bg-gray-50 text-gray-900 font-sans antialiased">
         
         <!-- Header -->
-        <header class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50">
+        <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <router-link to="/" class="flex items-center gap-2">
                     <div class="bg-yellow-500 rounded-lg p-1.5 rotate-3">
@@ -126,7 +126,7 @@ const isCurrentPartSelected = computed(() => {
         <main class="max-w-7xl mx-auto p-6 space-y-8">
 
             <!-- Stepper -->
-            <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 overflow-x-auto">
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 overflow-x-auto">
                 <Stepper 
                     :steps="builderStore.steps"
                     :current-index="builderStore.currentStepIndex"
@@ -176,7 +176,7 @@ const isCurrentPartSelected = computed(() => {
                                 :show-add-to-cart="false"
                                 @click="handleSelectComponent(comp)"
                                 :class="{
-                                    'ring-2 ring-yellow-500 ring-offset-2 dark:ring-offset-zinc-900': builderStore.selectedParts[builderStore.currentStep?.id]?.id === comp.id
+                                    'ring-2 ring-yellow-500 ring-offset-2': builderStore.selectedParts[builderStore.currentStep?.id]?.id === comp.id
                                 }"
                             />
                             <!-- Selection Indicator -->
@@ -192,7 +192,7 @@ const isCurrentPartSelected = computed(() => {
 
                 <!-- Summary Sidebar -->
                 <div class="space-y-4">
-                    <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 sticky top-24">
+                    <div class="bg-white rounded-2xl border border-gray-200 p-6 sticky top-24">
                         <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                             <Icon icon="mdi:clipboard-list" class="text-yellow-500" />
                             Your Build
@@ -220,7 +220,7 @@ const isCurrentPartSelected = computed(() => {
                             </div>
                         </div>
 
-                        <div class="border-t border-gray-100 dark:border-zinc-800 pt-4 mb-6">
+                        <div class="border-t border-gray-100 pt-4 mb-6">
                             <div class="flex items-center justify-between text-lg font-bold">
                                 <span>Total</span>
                                 <span class="text-yellow-500">${{ builderStore.totalPrice.toFixed(2) }}</span>
@@ -253,7 +253,7 @@ const isCurrentPartSelected = computed(() => {
             </div>
 
             <!-- Navigation Buttons -->
-            <div class="flex items-center justify-between bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-4">
+            <div class="flex items-center justify-between bg-white rounded-2xl border border-gray-200 p-4">
                 <Button 
                     @click="handlePrev" 
                     :disabled="builderStore.isFirstStep"
@@ -276,7 +276,7 @@ const isCurrentPartSelected = computed(() => {
 
         <!-- Save Modal -->
         <div v-if="showSaveModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="showSaveModal = false">
-            <div class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-800 p-6">
+            <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-gray-100 p-6">
                 <h2 class="text-xl font-bold mb-4">Save Your Build</h2>
                 <Input 
                     v-model="buildName" 

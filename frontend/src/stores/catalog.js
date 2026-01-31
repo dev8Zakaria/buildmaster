@@ -14,7 +14,7 @@ export const useCatalogStore = defineStore('catalog', () => {
     const error = ref(null);
 
     const api = axios.create({
-        baseURL: 'http://localhost:3000/api'
+        baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
     });
 
     // Fetch Recents

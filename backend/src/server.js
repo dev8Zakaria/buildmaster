@@ -20,7 +20,12 @@ app.get("/", (req, res) => {
   res.send("API is running");
 });
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "*",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
 
