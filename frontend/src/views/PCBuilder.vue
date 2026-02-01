@@ -89,6 +89,10 @@ const handleBuyNow = async () => {
 const isCurrentPartSelected = computed(() => {
     return !!builderStore.selectedParts[builderStore.currentStep?.id];
 });
+
+const isBuildComplete = computed(() => {
+    return builderStore.isLastStep && isCurrentPartSelected.value;
+});
 </script>
 
 <template>
@@ -232,8 +236,8 @@ const isCurrentPartSelected = computed(() => {
                             <Button 
                                 @click="showSaveModal = true"
                                 :disabled="!builderStore.allPartsSelected"
-                                class="w-full"
-                                variant="ghost"
+                                class="w-full border border-gray-300"
+                                variant="outline"
                             >
                                 <Icon icon="mdi:content-save" class="mr-2" />
                                 Save Build
@@ -252,24 +256,36 @@ const isCurrentPartSelected = computed(() => {
 
             </div>
 
-            <!-- Navigation Buttons -->
-            <div class="flex items-center justify-between bg-white rounded-2xl border border-gray-200 p-4">
-                <Button 
-                    @click="handlePrev" 
-                    :disabled="builderStore.isFirstStep"
-                    variant="ghost"
-                >
-                    <Icon icon="mdi:arrow-left" class="mr-2" />
-                    Previous
-                </Button>
+            <!-- Navigation Buttons - Sticky at bottom for better UX -->
+            <div class="sticky bottom-4 z-40">
+                <!-- Build Complete State -->
+                <div v-if="isBuildComplete" class="flex items-center justify-center gap-3 bg-green-50 rounded-2xl border border-green-200 p-6">
+                    <Icon icon="mdi:check-circle" class="text-4xl text-green-500" />
+                    <div class="text-center">
+                        <span class="text-xl font-bold text-green-600">Build Complete!</span>
+                        <p class="text-sm text-green-500">All components selected. Save or buy your build above.</p>
+                    </div>
+                </div>
 
-                <Button 
-                    @click="handleNext" 
-                    :disabled="builderStore.isLastStep"
-                >
-                    Next
-                    <Icon icon="mdi:arrow-right" class="ml-2" />
-                </Button>
+                <!-- Normal Navigation -->
+                <div v-else class="flex items-center justify-between bg-white rounded-2xl border border-gray-200 p-4 shadow-lg">
+                    <Button 
+                        @click="handlePrev" 
+                        :disabled="builderStore.isFirstStep"
+                        variant="ghost"
+                    >
+                        <Icon icon="mdi:arrow-left" class="mr-2" />
+                        Previous
+                    </Button>
+
+                    <Button 
+                        @click="handleNext" 
+                        :disabled="builderStore.isLastStep"
+                    >
+                        Next
+                        <Icon icon="mdi:arrow-right" class="ml-2" />
+                    </Button>
+                </div>
             </div>
 
         </main>

@@ -161,7 +161,7 @@ const formatDate = (dateString) => {
 
         <!-- Detail Modal -->
         <div v-if="showDetailModal && selectedBuild" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="showDetailModal = false">
-            <div class="bg-white w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-gray-100">
+            <div class="bg-white w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-xl border border-gray-100">
                 
                 <div class="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
                     <h2 class="text-xl font-bold">{{ selectedBuild.name }}</h2>

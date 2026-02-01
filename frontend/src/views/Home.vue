@@ -9,6 +9,7 @@ import ProductCard from '@/UI-elements/as_Inspira/ProductCard.vue';
 import Button from '@/UI-elements/as_Inspira/Button.vue';
 import CartDropdown from '@/components/cart/CartDropdown.vue';
 import AddToCartModal from '@/components/cart/AddToCartModal.vue';
+import InteractiveGridPattern from '@/UI-elements/Inspira/background.vue';
 
 const catalogStore = useCatalogStore();
 const authStore = useAuthStore();
@@ -60,7 +61,12 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 text-gray-900 font-sans antialiased">
+  <div class="min-h-screen bg-gray-50 text-gray-900 font-sans antialiased relative overflow-hidden">
+    
+    <!-- Background Grid Pattern -->
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <InteractiveGridPattern :width="50" :height="50" :squares="[80, 100]" class="opacity-60" />
+    </div>
     
     <!-- Navbar -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -119,7 +125,7 @@ const handleLogout = () => {
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-6 space-y-12 py-8">
+    <main class="max-w-7xl mx-auto p-6 space-y-12 py-8 relative z-10">
         
         <!-- Hero Section -->
         <section class="text-center space-y-4 py-6">

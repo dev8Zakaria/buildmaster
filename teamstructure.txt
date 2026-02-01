@@ -1,0 +1,76 @@
+🌐 TEAM STRUCTURE
+🔵 FRONTEND TEAM (2 Developers)
+Frontend Developer A (Zakaria) — UI Integration + Logic
++ DevOps FE
+Responsibilities
+●​ Develop UI pages that rely on complex backend APIs​
+●​ Implement state management (cart, user session, product browsing)​
+●​ Handle all frontend DevOps:​
+○​ Pipeline​
+○​ Build optimization​
+○​ Linting​
+○​ Structure of project​
+●​ Build reusable components and layouts
+Frontend Developer B(Senku) — Security + Testing +
+Sensitive UI
+Responsibilities
+●​ Develop UI pages that involve security, validation, and risky data handling.
+●​ Handle all UI security:​
+○​ XSS protection​
+○​ Input validation​
+○​ Token/session handling​
+●​ Write unit tests + E2E tests​
+●​ Manage all sensitive user-related screens​
+●​ Review Dev A code for vulnerabilities
+🟢 BACKEND TEAM (3 Developers)
+Aligned ➡️
+ Backend with your Dev requirement:​
+ 1 = heavy modules​
+➡️
+ Backend Dev 2 = light modules + security​
+➡️
+ Backend Dev 3 = light modules + DevOps
+Backend Developer 1(zentari or asaad) — Core Modules
+Owner (Heavy Logic)
+Responsibilities
+●​ Own the biggest, most complex backend modules​
+●​ Implement all heavy CRUD + business logic​
+●​ API architecture​
+●​ Database relationships​
+●​ Unit tests + Postman tests​
+●​ Swagger documentation
+Backend Developer 2(zentari or asaad) — Security + Light
+Modules
+Responsibilities
+●​ Implement backend security:​
+○​ JWT​
+○​ Roles (admin, caissier, user)​
+○​ Permissions​
+○​ Password hashing​
+○​ Input validation​
+●​ Handle lighter CRUD​
+●​ Review backend PRs
+Backend Developer 3(youssef) — DevOps + Light
+Modules
+Responsibilities
+●​ Backend CI/CD​
+●​ Dockerization​
+●​ Environments (dev/staging/prod)​
+●​ Monitoring (logs, metrics)​
+●​ API Gateway / Reverse Proxy​
+●​ Performance optimization​
+●​ Database migrations​
+●​ Assist others if needed
+🟣 TEAM WORKFLOW FOR THIS
+PROJECT
+1. Backend defines API contract first (Swagger)
+Because most UI depends on backend.
+2. Frontend starts with Authentication + Catalogue
+3. Backend Dev 1 builds core modules → FE Dev A integrates
+4. Frontend Dev B secures flows + writes tests
+5. Weekly sync:
+●​ FE + BE alignment​
+●​ API verification​
+●​ Sprint planning​
+6. CI/CD ensures fast delivery
+Set by Backend Dev 3 + Frontend Dev A.

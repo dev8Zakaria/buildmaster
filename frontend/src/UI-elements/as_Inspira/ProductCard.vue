@@ -53,7 +53,7 @@ const handleAddToCart = (e) => {
     )"
   >
     <!-- Image Area - Reduced height -->
-    <div class="h-36 w-full bg-muted/30 relative overflow-hidden p-4">
+    <div class="h-36 w-full bg-white relative overflow-hidden p-4 border-b border-gray-200">
       <div class="w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
         <img 
           v-if="imageUrl" 

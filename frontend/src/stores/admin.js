@@ -62,6 +62,19 @@ export const useAdminStore = defineStore('admin', () => {
         }
     };
 
+    const updateCategory = async (id, data) => {
+        isLoading.value = true;
+        try {
+            await api.put(`/category/${id}`, data);
+            await fetchCategories();
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Failed to update category';
+            throw error.value;
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     // --- Components ---
 
     const fetchComponents = async () => {
@@ -122,6 +135,7 @@ export const useAdminStore = defineStore('admin', () => {
         error,
         fetchCategories,
         createCategory,
+        updateCategory,
         deleteCategory,
         fetchComponents,
         createComponent,

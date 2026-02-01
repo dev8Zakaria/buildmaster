@@ -26,7 +26,7 @@ const corsOptions = {
       process.env.FRONTEND_URL,
       "http://localhost:5173",
       "https://buildmaster-fawn.vercel.app"
-    ].map(url => url?.replace(/\/$/, "")); // Remove trailing slashes
+    ].map(url => url?.replace(/\/$/, "")); 
 
     if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
       callback(null, true);
