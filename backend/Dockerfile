@@ -20,6 +20,7 @@ ENV CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
 ENV CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
 
 COPY package*.json ./
+RUN npm install groq-sdk @huggingface/inference
 RUN npm install --legacy-peer-deps
 
 COPY . .

@@ -8,12 +8,17 @@ services:
     env_file: .env
     ports:
       - "${BACKEND_PORT}:3000"
-      - "5555:5555"
     depends_on:
       db:
         condition: service_healthy
-    restart: on-failure  # Add this line
-    command: sh -c "npx prisma migrate deploy && npm run dev"
+    restart: "no" # Évite le loop infini en cas d'erreur API
+    command: >
+      sh -c "
+      npx prisma generate &&
+      npx prisma db push &&
+      (node src/scripts/vectorize.js || true) && 
+      npm run dev
+      "
 
   frontend:
     build: ./frontend
@@ -25,9 +30,10 @@ services:
       - backend
 
   db:
-    image: postgres:16
+    # IMAGE CRUCIALE pour pgvector
+    image: pgvector/pgvector:pg16 
     container_name: build_master_db
-    restart: no
+    restart: always
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -41,8 +47,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 30s 
-
+      start_period: 30s
   pgadmin:
     image: dpage/pgadmin4
     container_name: build_master_pgadmin
