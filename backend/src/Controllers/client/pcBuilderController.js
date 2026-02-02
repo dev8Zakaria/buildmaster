@@ -55,29 +55,26 @@ export const getComponentsForStep = async (req, res) => {
 
     // Étape 6 : Filtrer l'Alimentation par rapport au CPU + GPU
     if ((cat === 'psu' || cat === 'alimentation') && cpuId && gpuId) {
-      // Fixed Wattage Calculation
       const cpu = await prisma.component.findUnique({ where: { id: cpuId } });
       const gpu = await prisma.component.findUnique({ where: { id: gpuId } });
       if (cpu && gpu) {
-        // Parse values to ensure they are numbers, not strings
         const cpuTdp = parseInt(cpu.specifications.tdp) || 65;
         const gpuTdp = parseInt(gpu.specifications.tdp) || 0;
         const minWattage = (cpuTdp + gpuTdp) * 1.5;
-        // Temporarily disabled to bypass Data Type mismatch (String vs Number) in Database
-        // filters.specifications = { path: ['wattage'], gte: minWattage };
+        filters.specifications = { path: ['wattage'], gte: minWattage };
       }
     }
 
     // Étape 7 : Filtrer le Boîtier par rapport à la Carte Mère + GPU
-    if ((cat === 'case' || cat === 'boîtiers') && moboId && gpuId) {
+    if ((normalizedCat === 'case' || normalizedCat === 'boîtiers' || normalizedCat === 'boitiers') && moboId && gpuId) {
+      console.log(`[PCBuilder] Applying Case filters for Mobo: ${moboId} and GPU: ${gpuId}`);
       const mobo = await prisma.component.findUnique({ where: { id: moboId } });
       const gpu = await prisma.component.findUnique({ where: { id: gpuId } });
       if (mobo && gpu) {
-        // Temporarily disabled Case filters to debug data mismatch
-        // filters.AND = [
-        //   { specifications: { path: ['motherboardSupport'], array_contains: mobo.specifications.formFactor } },
-        //   { specifications: { path: ['maxGPULength'], gte: gpu.specifications.length } }
-        // ];
+        filters.AND = [
+          { specifications: { path: ['motherboardSupport'], array_contains: mobo.specifications.formFactor } },
+          { specifications: { path: ['maxGPULength'], gte: parseInt(gpu.specifications.length) } }
+        ];
       }
     }
 

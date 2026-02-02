@@ -2,8 +2,6 @@ import animate from "tailwindcss-animate";
 import { setupInspiraUI } from "@inspira-ui/plugins";
 
 export default {
-  darkMode: "selector",
-  safelist: ["dark"],
   prefix: "",
   content: ["./index.html", "./public/**/*.html", "./src/**/*.{vue,js,ts,jsx,tsx}", "./pages/**/*.{vue,js}"],
   theme: {

@@ -8,7 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('token') || null);
 
   const api = axios.create({
-    baseURL: 'http://localhost:3000/api'
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
   });
 
   // Restore Authorization header safely

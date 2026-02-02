@@ -60,10 +60,10 @@ const formatDate = (dateString) => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-black font-sans text-gray-900 dark:text-gray-100">
+    <div class="min-h-screen bg-gray-50 text-gray-900 font-sans antialiased">
         
         <!-- Header -->
-        <header class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50">
+        <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <router-link to="/" class="flex items-center gap-2">
                     <div class="bg-yellow-500 rounded-lg p-1.5 rotate-3">
@@ -107,8 +107,8 @@ const formatDate = (dateString) => {
 
             <!-- Empty State -->
             <div v-else-if="builderStore.savedBuilds.length === 0" class="text-center py-16">
-                <Icon icon="mdi:folder-open" class="text-6xl text-gray-300 dark:text-zinc-700 mb-4" />
-                <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">No Saved Builds</h2>
+                <Icon icon="mdi:folder-open" class="text-6xl text-gray-300 mb-4" />
+                <h2 class="text-xl font-semibold text-gray-600 mb-2">No Saved Builds</h2>
                 <p class="text-gray-500 mb-6">Start building your dream PC!</p>
                 <router-link to="/builder">
                     <Button>
@@ -123,14 +123,14 @@ const formatDate = (dateString) => {
                 <div 
                     v-for="build in builderStore.savedBuilds" 
                     :key="build.id"
-                    class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 hover:shadow-lg hover:border-yellow-200 dark:hover:border-yellow-900/50 transition-all"
+                    class="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg hover:border-yellow-200 transition-all"
                 >
                     <div class="flex items-start justify-between mb-4">
                         <div>
                             <h3 class="text-lg font-bold">{{ build.name }}</h3>
                             <p class="text-sm text-gray-500">{{ formatDate(build.createdAt) }}</p>
                         </div>
-                        <div class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 font-bold px-3 py-1 rounded-full text-sm">
+                        <div class="bg-yellow-100 text-yellow-600 font-bold px-3 py-1 rounded-full text-sm">
                             ${{ build.total_price }}
                         </div>
                     </div>
@@ -161,11 +161,11 @@ const formatDate = (dateString) => {
 
         <!-- Detail Modal -->
         <div v-if="showDetailModal && selectedBuild" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="showDetailModal = false">
-            <div class="bg-white dark:bg-zinc-900 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-800">
+            <div class="bg-white w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-xl border border-gray-100">
                 
-                <div class="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between sticky top-0 bg-white dark:bg-zinc-900 z-10">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
                     <h2 class="text-xl font-bold">{{ selectedBuild.name }}</h2>
-                    <button @click="showDetailModal = false" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg">
+                    <button @click="showDetailModal = false" class="p-2 hover:bg-gray-100 rounded-lg">
                         <Icon icon="mdi:close" />
                     </button>
                 </div>
@@ -177,11 +177,11 @@ const formatDate = (dateString) => {
                     </div>
 
                     <div class="space-y-3">
-                        <h3 class="font-semibold text-gray-700 dark:text-gray-300">Components</h3>
+                        <h3 class="font-semibold text-gray-700">Components</h3>
                         <div 
                             v-for="comp in selectedBuild.components" 
                             :key="comp.id"
-                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg"
+                            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                         >
                             <span class="font-medium">{{ comp.name }}</span>
                             <span class="text-sm text-gray-500">${{ comp.price }}</span>
@@ -189,10 +189,10 @@ const formatDate = (dateString) => {
                     </div>
                 </div>
 
-                <div class="p-6 border-t border-gray-100 dark:border-zinc-800 flex gap-3 sticky bottom-0 bg-white dark:bg-zinc-900">
+                <div class="p-6 border-t border-gray-100 flex gap-3 sticky bottom-0 bg-white">
                     <Button 
                         variant="ghost" 
-                        class="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        class="text-red-600 hover:bg-red-50"
                         @click="handleDelete(selectedBuild.id)"
                     >
                         <Icon icon="mdi:delete" class="mr-1" />

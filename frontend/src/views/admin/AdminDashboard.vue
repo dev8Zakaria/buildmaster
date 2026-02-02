@@ -217,9 +217,7 @@ const handleSubmit = async () => {
              if (modalMode.value === 'create') {
                 await adminStore.createCategory(catForm.value);
             } else {
-                // Update category logic not in store yet explicitly but easy to add
-                // await adminStore.updateCategory(editingId.value, catForm.value);
-                console.warn("Update Category not fully implemented in store yet");
+                await adminStore.updateCategory(editingId.value, catForm.value);
             }
         }
         showModal.value = false;
@@ -324,7 +322,7 @@ watch(() => compForm.value.categoryId, (newVal, oldVal) => {
 
         <!-- Dynamic Modal -->
         <div v-if="showModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="showModal = false">
-            <div class="bg-white dark:bg-zinc-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-800 flex flex-col">
+            <div class="bg-white dark:bg-zinc-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-800 flex flex-col">
                 
                 <div class="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between sticky top-0 bg-white dark:bg-zinc-900 z-10">
                     <h2 class="text-xl font-bold">
@@ -447,7 +445,7 @@ watch(() => compForm.value.categoryId, (newVal, oldVal) => {
                         <Button 
                             v-if="modalMode === 'edit'" 
                             type="button" 
-                            class="bg-white text-red-600 hover:bg-red-100 hover:text-red-700 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+                            class="bg-white text-red-600 border border-red-300 hover:bg-red-50 hover:border-red-400 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/40"
                             @click="handleDelete(editingId)"
                         >
                             <Icon icon="mdi:delete" class="mr-2" />

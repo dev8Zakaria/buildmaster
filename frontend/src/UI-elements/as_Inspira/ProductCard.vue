@@ -48,12 +48,12 @@ const handleAddToCart = (e) => {
   <div 
     @click="$emit('click')"
     :class="cn(
-      'group relative flex flex-col bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-yellow-200 dark:hover:border-yellow-900/50 transition-all duration-300 cursor-pointer h-full',
+      'group relative flex flex-col bg-card text-card-foreground border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-yellow-200 transition-all duration-300 cursor-pointer h-full',
       props.class
     )"
   >
     <!-- Image Area - Reduced height -->
-    <div class="h-36 w-full bg-gray-50 dark:bg-zinc-800/50 relative overflow-hidden p-4">
+    <div class="h-36 w-full bg-white relative overflow-hidden p-4 border-b border-gray-200">
       <div class="w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
         <img 
           v-if="imageUrl" 
@@ -76,18 +76,18 @@ const handleAddToCart = (e) => {
     <!-- Content Area - More compact -->
     <div class="p-3 flex flex-col flex-1 gap-1">
       <div class="flex-1 min-w-0">
-        <h3 class="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm" :title="name">
+        <h3 class="font-semibold text-gray-900 truncate text-sm" :title="name">
           {{ name }}
         </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ brand }}</p>
+        <p class="text-xs text-gray-500 truncate">{{ brand }}</p>
       </div>
 
       <div class="flex items-center justify-between pt-1">
-        <span class="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded text-gray-600 dark:text-gray-300 truncate max-w-[60%]">
+        <span class="text-xs px-1.5 py-0.5 bg-gray-100 rounded text-gray-600 truncate max-w-[60%]">
           {{ category }}
         </span>
         
-        <div class="flex items-center gap-1 text-xs" :class="Number(stock) > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+        <div class="flex items-center gap-1 text-xs" :class="Number(stock) > 0 ? 'text-green-600' : 'text-red-600'">
             <Icon v-if="Number(stock) > 0" icon="mdi:check-circle" class="text-sm" />
             <Icon v-else icon="mdi:alert-circle" class="text-sm" />
         </div>
@@ -104,7 +104,7 @@ const handleAddToCart = (e) => {
       </button>
       <div 
         v-else-if="Number(stock) <= 0"
-        class="mt-2 w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-gray-200 dark:bg-zinc-700 text-gray-500 dark:text-gray-400 text-xs font-semibold rounded-lg cursor-not-allowed"
+        class="mt-2 w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-gray-200 text-gray-500 text-xs font-semibold rounded-lg cursor-not-allowed"
       >
         Out of Stock
       </div>

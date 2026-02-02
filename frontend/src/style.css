@@ -44,42 +44,6 @@
 
     --radius: 0.5rem;
   }
-
-  .dark {
-    --background: 0 0% 10%;
-    /* Dark Gray Background */
-    --foreground: 0 0% 95%;
-    /* Light Text */
-
-    --card: 0 0% 15%;
-    /* Darker Card */
-    --card-foreground: 0 0% 95%;
-
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 48 96% 53%;
-    /* Yellow-500 */
-    --primary-foreground: 0 0% 10%;
-
-    --secondary: 0 0% 20%;
-    /* Dark Gray Secondary */
-    --secondary-foreground: 0 0% 95%;
-
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 60%;
-
-    --accent: 48 96% 25%;
-    /* Darkened Yellow Accent */
-    --accent-foreground: 48 96% 53%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 48 96% 53%;
-  }
 }
 
 @layer base {
@@ -89,5 +53,20 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Utility to hide scrollbars while keeping scroll functionality */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
   }
 }

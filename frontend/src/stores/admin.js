@@ -10,7 +10,7 @@ export const useAdminStore = defineStore('admin', () => {
     const error = ref(null);
 
     const api = axios.create({
-        baseURL: 'http://localhost:3000/api'
+        baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
     });
 
     // Add JWT token to all requests
@@ -59,6 +59,19 @@ export const useAdminStore = defineStore('admin', () => {
             await fetchCategories();
         } catch (err) {
             throw err.response?.data?.details || err.response?.data?.error || err.response?.data?.message || 'Failed to delete category';
+        }
+    };
+
+    const updateCategory = async (id, data) => {
+        isLoading.value = true;
+        try {
+            await api.put(`/category/${id}`, data);
+            await fetchCategories();
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Failed to update category';
+            throw error.value;
+        } finally {
+            isLoading.value = false;
         }
     };
 
@@ -122,6 +135,7 @@ export const useAdminStore = defineStore('admin', () => {
         error,
         fetchCategories,
         createCategory,
+        updateCategory,
         deleteCategory,
         fetchComponents,
         createComponent,
