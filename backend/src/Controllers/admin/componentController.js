@@ -1,5 +1,6 @@
 import prismaClient from '../../Config/prisma.js';
-import { removeImageFromCloudinary  } from '../../Midllewars/cloudinary.js';
+import { removeImageFromCloudinary } from '../../Midllewars/cloudinary.js';
+import { generateEmbedding } from '../../Services/AIService.js';
 
 // 1. CRÉER UN COMPOSANT (POST)
 // ==========================================
@@ -19,7 +20,7 @@ export const createComponent = async (req, res) => {
         let specsParsed = {};
         try {
             // specifications arrive comme une string '{"ram": "16gb"}'
-            if (specifications) specsParsed = JSON.parse(specifications); 
+            if (specifications) specsParsed = JSON.parse(specifications);
         } catch (e) {
             return res.status(400).json({ error: "Format JSON invalide pour specifications" });
         }
@@ -35,8 +36,23 @@ export const createComponent = async (req, res) => {
         };
 
         const newComponent = await prismaClient.component.create({
-            data: componentData
+            data: componentData,
+            include: { category: true } // Need category name for embedding
         });
+
+        // Trigger Auto-Vectorization
+        try {
+            const embeddingText = `Category: ${newComponent.category.name}, Product: ${newComponent.name}, Brand: ${newComponent.brand}, Specs: ${JSON.stringify(newComponent.specifications)}`;
+            const vector = await generateEmbedding(embeddingText);
+            const vectorString = `[${vector.join(',')}]`;
+
+            await prismaClient.$executeRaw`
+                UPDATE components SET embedding = ${vectorString}::vector WHERE id = ${newComponent.id}
+            `;
+            console.log(`✅ Auto-vectorized: ${newComponent.name}`);
+        } catch (vError) {
+            console.error("Vectorization failed but component created:", vError.message);
+        }
 
         res.status(201).json({ message: "Composant créé", component: newComponent });
 
@@ -85,14 +101,14 @@ export const getComponentsByCategory = async (req, res) => {
     const { categoryId } = req.params;
 
     try {
-        const components = await prismaClient.component.findMany({ 
-            where: { 
-                categoryId: parseInt(categoryId) 
+        const components = await prismaClient.component.findMany({
+            where: {
+                categoryId: parseInt(categoryId)
             },
             include: { category: true }
         });
 
-        
+
         if (components.length === 0) {
             return res.status(404).json({ message: "Aucun composant trouvé pour cette catégorie" });
         }
@@ -110,16 +126,16 @@ export const getRecentComponents = async (req, res) => {
         const recentComponents = await prismaClient.component.findMany({
             // 1. Trier par date de création (descendant = du plus récent au plus vieux)
             orderBy: {
-                createdAt: 'desc' 
+                createdAt: 'desc'
             },
             // 2. Limiter à 10 résultats
             take: 10,
-            
+
             // 3. (Optionnel) Filtrer pour ne prendre que les produits actifs
             where: {
                 isActive: true
             },
-            
+
             // 4. Inclure la catégorie pour l'affichage
             include: {
                 category: true
@@ -170,8 +186,25 @@ export const updateComponent = async (req, res) => {
 
         const updatedComponent = await prismaClient.component.update({
             where: { id },
-            data: updateData
+            data: updateData,
+            include: { category: true }
         });
+
+        // Re-trigger Vectorization if relevant fields changed
+        if (name || brand || specifications || categoryId) {
+            try {
+                const embeddingText = `Category: ${updatedComponent.category.name}, Product: ${updatedComponent.name}, Brand: ${updatedComponent.brand}, Specs: ${JSON.stringify(updatedComponent.specifications)}`;
+                const vector = await generateEmbedding(embeddingText);
+                const vectorString = `[${vector.join(',')}]`;
+
+                await prismaClient.$executeRaw`
+                    UPDATE components SET embedding = ${vectorString}::vector WHERE id = ${updatedComponent.id}
+                `;
+                console.log(`✅ Re-vectorized: ${updatedComponent.name}`);
+            } catch (vError) {
+                console.error("Re-vectorization failed:", vError.message);
+            }
+        }
 
         res.status(200).json({ message: "Mise à jour réussie", component: updatedComponent });
 

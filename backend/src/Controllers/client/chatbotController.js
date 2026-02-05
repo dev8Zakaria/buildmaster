@@ -5,18 +5,18 @@ export const handleChatMessage = async (req, res) => {
     try {
         const { message } = req.body;
 
-        // Détection d'intention RAG
-        if (message.toLowerCase().match(/(recommande|conseil|build|pc|choisir|quel|config)/)) {
+        // Intent detection (RAG trigger)
+        if (message.toLowerCase().match(/(recommend|suggest|advice|build|pc|choose|which|best|storage|gpu|cpu|parts|stock)/)) {
             return await handleRecommendation(message, res);
         }
 
-        // Chat simple
+        // Simple Chat
         const response = await generateText(message);
         res.json({ response });
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ response: "Erreur serveur." });
+        res.status(500).json({ response: "Server error." });
     }
 };
 
@@ -25,36 +25,60 @@ async function handleRecommendation(query, res) {
         const vector = await generateEmbedding(query);
         const vectorString = `[${vector.join(',')}]`;
 
-        // Recherche SQL
+        // SQL Search - Balanced Retrieval: Up to 3 per category, total 17.
         const products = await prisma.$queryRaw`
-            SELECT name, brand, price FROM "components"
-            WHERE embedding IS NOT NULL
-            ORDER BY embedding <=> ${vectorString}::vector
-            LIMIT 3;
+            WITH ScoredProducts AS (
+                SELECT 
+                    c.name, c.brand, c.price, c.specifications, cat.name as category,
+                    c.embedding <=> ${vectorString}::vector as distance,
+                    ROW_NUMBER() OVER (PARTITION BY c."categoryId" ORDER BY c.embedding <=> ${vectorString}::vector) as rank_in_cat
+                FROM "components" c
+                JOIN "component_categories" cat ON c."categoryId" = cat.id
+                WHERE c.embedding IS NOT NULL
+            )
+            SELECT name, brand, price, specifications, category
+            FROM ScoredProducts
+            WHERE rank_in_cat <= 3
+            ORDER BY distance ASC
+            LIMIT 17;
         `;
 
         if (products.length === 0) {
-            return res.json({ response: "Aucun produit trouvé en stock." });
+            return res.json({ response: "I couldn't find any matching products in our stock." });
         }
 
-        const context = products.map(p => `- ${p.brand} ${p.name} (${p.price}€)`).join('\n');
-        
-        // Prompt pour Llama 3
+        const context = products.map(p => {
+            let specsText = "No specs";
+            if (p.specifications) {
+                specsText = Object.entries(p.specifications)
+                    .map(([key, val]) => `${key}: ${val}`)
+                    .join(', ');
+            }
+            return `- [${p.category}] ${p.brand} ${p.name} ($${p.price}) | ${specsText}`;
+        }).join('\n');
+
         const prompt = `
-        Tu es un expert hardware. Utilise UNIQUEMENT ces produits pour répondre :
+        You are a specialized PC Hardware Expert for the "Build Master" store. 
+        Your task is to provide expert advice using ONLY the real-time stock listed below.
+        
+        STOCK CONTEXT:
         ${context}
         
-        Question utilisateur : ${query}
+        USER QUESTION: ${query}
         
-        Réponse (en français, courte et précise) :
+        INSTRUCTIONS:
+        1. Be technically precise. I have provided a balanced selection of parts (up to 3 per category).
+        2. If building a full PC, ensure you pick one from each necessary category found in the stock.
+        3. If you don't find a specific category (like Cooling), clearly state that we are currently out of stock for that specific part.
+        4. Explain your choices based on the specifications (e.g., speed, wattage).
+        5. Keep the answer professional and in English.
         `;
 
         const aiResponse = await generateText(prompt);
         res.json({ response: aiResponse });
 
     } catch (err) {
-        console.error("Erreur RAG:", err.message);
-        // Fallback propre
-        res.json({ response: "Je ne peux pas rédiger de conseil pour l'instant, mais j'ai trouvé des produits correspondants dans la base de données." });
+        console.error("RAG Error:", err.message);
+        res.json({ response: "I'm having trouble retrieving recommendations at the moment, but I can help with general hardware questions!" });
     }
 }
