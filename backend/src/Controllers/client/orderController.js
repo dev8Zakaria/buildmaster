@@ -40,3 +40,45 @@ export const getMyPaidOrderById = async (req, res) => {
     return res.status(500).json({ msg: "Failed to fetch order" });
   }
 };
+// GET /api/orders/admin/all (ADMIN ONLY)
+export const getAllOrdersAdmin = async (req, res) => {
+  try {
+    // Note: Assure-toi que ton middleware isAdmin protège cette route
+    
+    const orders = await prisma.order.findMany({
+      where: {
+        status: "PAID" // On ne veut que les commandes validées
+      },
+      orderBy: {
+        createdAt: "desc" // Les plus récentes en premier
+      },
+      include: {
+        user: { // On inclut les infos du client pour savoir qui a commandé
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        items: {
+          include: {
+            component: { // On inclut les détails des produits
+                select: {
+                    name: true,
+                    brand: true,
+                    price: true,
+                    ImageUrl: true
+                }
+            } 
+          }
+        }
+      }
+    });
+
+    return res.status(200).json(orders);
+  } catch (e) {
+    console.error("GET ADMIN ORDERS ERROR:", e);
+    return res.status(500).json({ msg: "Failed to fetch all orders" });
+  }
+};

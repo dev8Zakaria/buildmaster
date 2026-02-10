@@ -6,18 +6,28 @@ import {
   addToCart,
   buyNow,
   checkout,
+  updateCartItemQty, // Import ajouté
+  removeCartItem,    // Import ajouté
 } from "../../Controllers/client/cartController.js";
+import { transferBuildToOrder } from "../../Controllers/client/addBuildToCart.js"; // Import pour le transfert de build
 
 const router = express.Router();
 
-router.get("/", [authMidlleware ,isCustomer], getCart);
-router.post("/add", [authMidlleware, isCustomer], addToCart);
-router.post("/buy-now", [authMidlleware, isCustomer], buyNow);
-router.post("/checkout", [authMidlleware, isCustomer], checkout);
-//router.patch("/item/:itemId",[authMidlleware, isCustomer], updateCartItemQty);
-//router.delete("/item/:itemId",[authMidlleware, isCustomer], removeCartItem);
+// Middleware de base pour toutes les routes du panier (Auth + Client)
+const protect = [authMidlleware, isCustomer];
 
+// --- Gestion du Panier ---
+router.get("/", protect, getCart);
+router.post("/add", protect, addToCart);
+router.post("/buy-now", protect, buyNow);
+router.post("/checkout", protect, checkout);
 
+// --- Modification et Suppression (Décommentés et activés) ---
+router.patch("/item/:itemId", protect, updateCartItemQty); // Modifier la quantité (+/-)
+router.delete("/item/:itemId", protect, removeCartItem);   // Supprimer un article du panier
 
+// --- Transfert (Build -> Panier) ---
+// Transfère une configuration sauvegardée (PC Builder) vers le panier
+router.post("/transfer-build/:buildId", protect, transferBuildToOrder);
 
 export default router;

@@ -232,7 +232,7 @@ export const updateCartItemQty = async (req, res) => {
         data: { quantity: qty },
       });
 
-      await recomputeTotal(tx, order.id);
+      await recomputeOrderTotal(tx, order.id);
 
       return tx.order.findUnique({
         where: { id: order.id },
@@ -269,7 +269,7 @@ export const removeCartItem = async (req, res) => {
 
       await tx.orderItem.delete({ where: { id: itemId } });
 
-      await recomputeTotal(tx, order.id);
+      await recomputeOrderTotal(tx, order.id);
 
       return tx.order.findUnique({
         where: { id: order.id },
