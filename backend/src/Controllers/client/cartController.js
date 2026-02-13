@@ -116,29 +116,69 @@ export const addToCart = async (req, res) => {
 // POST /api/cart/buy-now
 // même logique que addToCart, mais le frontend redirige checkout
 export const buyNow = async (req, res) => {
-  // on réutilise addToCart puis on renvoie un flag
-  // (backend ne “redirige” pas, c’est le frontend qui redirige)
-  req.body.quantity = req.body.quantity ?? 1;
-
-  // on appelle addToCart “manuellement”
-  // plus simple: dupliquer logique? non. Ici on fait simple:
-  // => appelle addToCart, puis renvoie { cartId, goCheckout: true }
   try {
-    // on fait la même transaction que addToCart en appelant directement la fonction :
-    // (pour rester clair, on recopie une mini version)
     const userId = req.user.id;
-    const { componentId } = req.body;
+    const { componentId, quantity } = req.body;
+    const qty = quantity ? Number(quantity) : 1;
 
-    const cart = await prisma.order.findFirst({
-      where: { userId, status: "PENDING" },
+    if (!componentId || typeof componentId !== "string") {
+      return res.status(400).json({ msg: "componentId is required" });
+    }
+    if (!Number.isInteger(qty) || qty <= 0) {
+      return res.status(400).json({ msg: "quantity must be a positive integer" });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 1) trouver ou créer Order PENDING
+      let cart = await tx.order.findFirst({
+        where: { userId, status: "PENDING" },
+      });
+
+      if (!cart) {
+        cart = await tx.order.create({
+          data: { userId, status: "PENDING", totalAmount: new Prisma.Decimal(0) },
+        });
+      }
+
+      // 2) vérifier le composant
+      const comp = await tx.component.findFirst({
+        where: { id: componentId, isActive: true },
+        select: { id: true, price: true, stock: true },
+      });
+
+      if (!comp) {
+        return { error: "Component not found or inactive" };
+      }
+
+      // stock check
+      if (comp.stock < qty) {
+        return { error: "Insufficient stock" };
+      }
+
+      // 3) créer OU incrementer OrderItem
+      await tx.orderItem.upsert({
+        where: { orderId_componentId: { orderId: cart.id, componentId: comp.id } },
+        create: {
+          orderId: cart.id,
+          componentId: comp.id,
+          quantity: qty,
+          unitPrice: comp.price,
+        },
+        update: {
+          quantity: { increment: qty },
+        },
+      });
+
+      // 4) recalcul total
+      await recomputeOrderTotal(tx, cart.id);
+
+      // 5) Retourner un flag pour dire au front de rediriger
+      return { msg: "Item added, proceeding to checkout", goCheckout: true, cartId: cart.id };
     });
 
-    // si pas de cart, addToCart la créera
-    // donc on appelle addToCart via un “fake res” serait moche
-    // => solution clean: le frontend appelle /cart/add puis redirige
-    return res.status(400).json({
-      msg: "Use /api/cart/add then redirect to checkout (frontend).",
-    });
+    if (result.error) return res.status(400).json({ msg: result.error });
+    return res.status(200).json(result);
+
   } catch (e) {
     console.error("BUY NOW ERROR:", e);
     return res.status(500).json({ msg: "Failed buy now" });

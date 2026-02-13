@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Franklin Gothic Medium"', 'sans-serif'],
+        sans: ['Outfit', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",

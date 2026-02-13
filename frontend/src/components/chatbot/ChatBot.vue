@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, watch, computed } from 'vue';
+import { ref, nextTick, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import axios from 'axios';
@@ -11,14 +11,12 @@ const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
 });
 
-// Visibility logic: Only show when logged in AND not on auth pages
 const isVisible = computed(() => {
     return !!authStore.token && 
            authStore.user?.role !== 'Admin' && 
            !['SignIn', 'SignUp'].includes(route.name);
 });
 
-// Interceptor for Auth (if user logged in, use their context)
 api.interceptors.request.use((config) => {
     if (authStore.token) {
         config.headers.Authorization = `Bearer ${authStore.token}`;
@@ -28,7 +26,7 @@ api.interceptors.request.use((config) => {
 
 const isOpen = ref(false);
 const messages = ref([
-    { role: 'assistant', content: 'Hi! I can help you build a PC. Ask me for a recommendation or any hardware question!' }
+    { role: 'assistant', content: 'System Initialized. I am your specialized hardware configuration assistant. How can I optimize your build today?' }
 ]);
 const userInput = ref('');
 const isLoading = ref(false);
@@ -49,7 +47,6 @@ const scrollToBottom = async () => {
 const sendMessage = async () => {
     if (!userInput.value.trim() || isLoading.value) return;
 
-    // Add user message
     const text = userInput.value;
     messages.value.push({ role: 'user', content: text });
     userInput.value = '';
@@ -60,7 +57,7 @@ const sendMessage = async () => {
         const response = await api.post('/chat', { message: text });
         messages.value.push({ role: 'assistant', content: response.data.response });
     } catch (error) {
-        messages.value.push({ role: 'assistant', content: "Sorry, I'm having trouble connecting to the server." });
+        messages.value.push({ role: 'assistant', content: "Connection severed. Unable to reach neural core." });
     } finally {
         isLoading.value = false;
         scrollToBottom();
@@ -69,73 +66,78 @@ const sendMessage = async () => {
 </script>
 
 <template>
-    <div v-if="isVisible" class="fixed top-16 right-6 z-[9999] font-sans flex flex-col items-end gap-2 group">
+    <div v-if="isVisible" class="fixed bottom-6 right-6 z-[9999] font-sans flex flex-col items-end gap-4">
         
-        <!-- Tooltip (Visible on Hover) -->
-        <div class="bg-card text-foreground text-[11px] font-bold py-2 px-4 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none mb-2 shadow-xl shadow-yellow-500/10 border border-border whitespace-nowrap transform translate-x-2 group-hover:translate-x-0">
-            Hey! Need a custom PC recommendation? 🤖
-        </div>
-
         <!-- Chat Window -->
         <transition name="slide-up">
-            <div v-if="isOpen" class="mr-2 bg-card w-[360px] h-[500px] rounded-2xl shadow-2xl flex flex-col border border-border overflow-hidden ring-4 ring-yellow-500/5">
+            <div v-if="isOpen" class="mb-4 bg-white/95 backdrop-blur-xl w-[380px] h-[600px] rounded-2xl shadow-2xl flex flex-col border border-gray-200 overflow-hidden ring-1 ring-gray-100">
                 
                 <!-- Header -->
-                <div class="p-4 bg-gradient-to-r from-yellow-500 to-amber-600 text-white flex justify-between items-center shadow-md">
-                    <div class="flex items-center gap-2">
-                        <div class="bg-white/20 p-1.5 rounded-full">
-                            <Icon icon="mdi:robot-happy" class="text-xl" />
+                <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent"></div>
+                    <div class="relative flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                            <Icon icon="mdi:robot" class="text-white text-xl" />
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm">PC Master AI</span>
-                            <span class="text-[10px] opacity-90 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                Online Technician
+                            <span class="font-black text-gray-900 text-sm tracking-wide" style="font-family: 'Outfit', sans-serif;">PC_MASTER_AI</span>
+                            <span class="text-[10px] text-emerald-600 font-mono flex items-center gap-1.5 uppercase tracking-wider">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+                                Online
                             </span>
                         </div>
                     </div>
-                    <button @click="toggleChat" class="hover:bg-white/20 rounded-full p-1 transition">
+                    <button @click="toggleChat" class="relative z-10 text-gray-400 hover:text-gray-900 transition-colors bg-white hover:bg-gray-100 p-2 rounded-lg border border-gray-100">
                         <Icon icon="mdi:close" />
                     </button>
                 </div>
 
                 <!-- Messages Area -->
-                <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/20">
+                <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
                     <div 
                         v-for="(msg, index) in messages" 
                         :key="index"
-                        :class="[
-                            'max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap shadow-sm',
-                            msg.role === 'user' 
-                                ? 'bg-yellow-500 text-white ml-auto rounded-br-none' 
-                                : 'bg-secondary text-secondary-foreground border border-border rounded-bl-none'
-                        ]"
-                    >
-                        {{ msg.content }}
+                        class="flex flex-col max-w-[85%]"
+                        :class="msg.role === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'"
+                    >   
+                        <span class="text-[10px] uppercase font-mono text-gray-400 mb-1 ml-1" v-if="msg.role === 'assistant'">AI_RESPONSE</span>
+                        <div 
+                            :class="[
+                                'p-4 rounded-2xl text-sm leading-relaxed shadow-sm',
+                                msg.role === 'user' 
+                                    ? 'bg-zinc-900 text-white rounded-br-none font-bold' 
+                                    : 'bg-gray-100 border border-gray-200 text-gray-800 rounded-bl-none'
+                            ]"
+                        >
+                            {{ msg.content }}
+                        </div>
                     </div>
 
                     <!-- Loading Indicator -->
-                    <div v-if="isLoading" class="bg-secondary border border-border p-3 rounded-2xl rounded-bl-none w-16 flex items-center gap-1">
-                        <div class="w-2 h-2 bg-yellow-500 rounded-full animate-bounce"></div>
-                        <div class="w-2 h-2 bg-yellow-500 rounded-full animate-bounce delay-75"></div>
-                        <div class="w-2 h-2 bg-yellow-500 rounded-full animate-bounce delay-150"></div>
+                    <div v-if="isLoading" class="flex flex-col items-start mr-auto max-w-[85%]">
+                        <span class="text-[10px] uppercase font-mono text-gray-400 mb-1 ml-1">PROCESSING</span>
+                        <div class="bg-gray-100 border border-gray-200 p-4 rounded-2xl rounded-bl-none flex items-center gap-1.5">
+                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
+                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce delay-75"></div>
+                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce delay-150"></div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Input Area -->
-                <div class="p-4 bg-card border-t border-border">
-                    <form @submit.prevent="sendMessage" class="flex items-center gap-2">
+                <div class="p-4 bg-gray-50/50 border-t border-gray-100 backdrop-blur-sm">
+                    <form @submit.prevent="sendMessage" class="relative group">
                         <input 
                             v-model="userInput"
-                            placeholder="Ask for a build..."
-                            class="flex-1 bg-muted/50 text-foreground rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all border border-border"
+                            placeholder="Input command or query..."
+                            class="w-full bg-white text-gray-900 rounded-xl pl-4 pr-12 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all border border-gray-200 font-mono placeholder-gray-400 shadow-sm"
                         />
                         <button 
                             type="submit" 
                             :disabled="isLoading || !userInput.trim()"
-                            class="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition transform active:scale-95 shadow-md shadow-yellow-500/30"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-amber-500 hover:bg-amber-400 text-white p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/20"
                         >
-                            <Icon icon="mdi:send" />
+                            <Icon icon="mdi:send-variant" class="text-lg" />
                         </button>
                     </form>
                 </div>
@@ -145,12 +147,19 @@ const sendMessage = async () => {
 
         <!-- Toggle Button -->
         <button 
-            v-if="!isOpen"
             @click="toggleChat"
-            class="relative group bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-white p-4 rounded-full shadow-lg shadow-yellow-500/40 transition-all duration-300 hover:scale-110 hover:-translate-y-1"
-        >
-            <!-- Main Icon -->
-            <Icon icon="mdi:robot-happy" class="text-3xl" />
+            class="group relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 z-50 overflow-hidden"
+        >   
+            <div class="absolute inset-0 bg-amber-500/0 group-hover:bg-amber-500/10 transition-colors"></div>
+            
+            <!-- Glow Effect behind icon -->
+            <div class="absolute w-full h-full bg-amber-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+            <Icon v-if="!isOpen" icon="mdi:message-text-outline" class="text-2xl text-white relative z-10 group-hover:text-amber-500 transition-colors" />
+            <Icon v-else icon="mdi:chevron-down" class="text-3xl text-white relative z-10" />
+            
+            <!-- Notification Dot (Simulated) -->
+            <span v-if="!isOpen" class="absolute top-3 right-3 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-zinc-900 z-20"></span>
         </button>
 
     </div>
@@ -159,12 +168,13 @@ const sendMessage = async () => {
 <style scoped>
 .slide-up-enter-active,
 .slide-up-leave-active {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .slide-up-enter-from,
 .slide-up-leave-to {
   opacity: 0;
-  transform: translateY(20px) scale(0.95);
+  transform: translateY(40px) scale(0.95);
+  filter: blur(10px);
 }
 </style>

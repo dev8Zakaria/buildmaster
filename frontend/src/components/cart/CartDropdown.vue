@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
 import { Icon } from '@iconify/vue';
-import Button from '@/UI-elements/as_Inspira/Button.vue';
 import { useCartStore } from '@/stores/cart';
 import { useRouter } from 'vue-router';
 import { onClickOutside } from '@vueuse/core';
@@ -24,6 +23,10 @@ const goToCheckout = () => {
     router.push('/checkout');
 };
 
+const handleRemoveItem = async (itemId) => {
+    await cartStore.removeCartItem(itemId);
+};
+
 onClickOutside(dropdownRef, () => {
     isOpen.value = false;
 });
@@ -36,14 +39,14 @@ defineExpose({ toggle });
         <!-- Cart Icon Button -->
         <button 
             @click="toggle"
-            class="relative p-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-zinc-800 transition-colors"
+            class="relative p-2.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all group"
         >
-            <Icon icon="mdi:cart-outline" class="text-2xl" />
+            <Icon icon="mdi:cart-outline" class="text-2xl group-hover:scale-110 transition-transform" />
             
             <!-- Badge -->
             <span 
                 v-if="cartStore.itemCount > 0"
-                class="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1"
+                class="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-amber-600 text-white text-[10px] font-black rounded-full px-1 shadow-lg shadow-amber-500/30 animate-in zoom-in"
             >
                 {{ cartStore.itemCount > 99 ? '99+' : cartStore.itemCount }}
             </span>
@@ -53,76 +56,87 @@ defineExpose({ toggle });
         <Transition name="dropdown">
             <div 
                 v-if="isOpen"
-                class="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden z-50"
+                class="absolute right-0 top-full mt-4 w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 origin-top-right ring-1 ring-gray-100"
             >
                 <!-- Header -->
-                <div class="p-4 border-b border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
-                    <h3 class="font-semibold text-gray-900 dark:text-white">
-                        Shopping Cart ({{ cartStore.itemCount }})
-                    </h3>
+                <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm uppercase tracking-wider" style="font-family: 'Outfit', sans-serif;">Cart Manifest</h3>
+                        <p class="text-[10px] text-amber-600 font-mono">{{ cartStore.itemCount }} UNIT{{ cartStore.itemCount !== 1 ? 'S' : '' }} LOGGED</p>
+                    </div>
+                    <button @click="toggle" class="p-1 text-gray-400 hover:text-gray-900 transition-colors">
+                        <Icon icon="mdi:close" class="text-lg" />
+                    </button>
                 </div>
 
                 <!-- Items List -->
-                <div class="max-h-64 overflow-y-auto">
-                    <div v-if="cartStore.isLoading" class="p-8 text-center">
-                        <Icon icon="eos-icons:loading" class="text-3xl text-yellow-500 animate-spin" />
+                <div class="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                    <div v-if="cartStore.isLoading" class="p-12 text-center">
+                        <Icon icon="eos-icons:loading" class="text-2xl text-amber-500 animate-spin mx-auto mb-2" />
+                        <span class="text-[10px] text-gray-500 font-mono">LOADING_DATA...</span>
                     </div>
                     
-                    <div v-else-if="cartStore.items.length === 0" class="p-8 text-center text-gray-500">
-                        <Icon icon="mdi:cart-off" class="text-4xl mb-2 opacity-50" />
-                        <p>Your cart is empty</p>
+                    <div v-else-if="cartStore.items.length === 0" class="p-12 text-center text-gray-400">
+                        <Icon icon="mdi:cart-off" class="text-4xl mb-3 opacity-30 mx-auto" />
+                        <p class="text-xs font-mono">NO ITEMS DETECTED</p>
                     </div>
 
-                    <div v-else class="divide-y divide-gray-100 dark:divide-zinc-800">
+                    <div v-else class="divide-y divide-gray-100">
                         <div 
                             v-for="item in cartStore.items" 
                             :key="item.id"
-                            class="p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                            class="p-4 flex gap-4 hover:bg-gray-50/50 transition-colors group relative"
                         >
                             <!-- Product Image -->
-                            <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-zinc-800 overflow-hidden flex-shrink-0 p-1">
+                            <div class="w-14 h-14 rounded bg-white border border-gray-200 p-1 flex-shrink-0 flex items-center justify-center">
                                 <img 
                                     v-if="item.component?.ImageUrl" 
                                     :src="item.component.ImageUrl" 
                                     :alt="item.component?.name"
-                                    class="w-full h-full object-contain"
-                                />
-                                <Icon v-else icon="mdi:image-off" class="w-full h-full text-gray-400" />
+                                    class="w-full h-full object-contain mix-blend-multiply"
+                                >
+                                <Icon v-else icon="mdi:chip" class="text-gray-400" />
                             </div>
 
                             <!-- Product Info -->
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                <h4 class="text-xs font-bold text-gray-900 truncate" :title="item.component?.name">
                                     {{ item.component?.name }}
-                                </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    Qty: {{ item.quantity }} × ${{ item.unitPrice }}
-                                </p>
+                                </h4>
+                                <div class="flex items-center justify-between mt-1">
+                                    <span class="text-[10px] text-gray-500 font-mono">{{ item.quantity }} × ${{ item.unitPrice }}</span>
+                                    <span class="text-xs font-bold text-amber-600 font-mono">${{ (item.quantity * item.unitPrice).toFixed(2) }}</span>
+                                </div>
                             </div>
 
-                            <!-- Item Total -->
-                            <div class="text-sm font-semibold text-yellow-600 dark:text-yellow-400">
-                                ${{ (item.quantity * item.unitPrice).toFixed(2) }}
-                            </div>
+                            <!-- Remove Button (Absolute) -->
+                            <button 
+                                @click="handleRemoveItem(item.id)"
+                                class="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"
+                                title="Remove Item"
+                            >
+                                <Icon icon="mdi:close" class="text-xs" />
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Footer -->
-                <div v-if="cartStore.items.length > 0" class="p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Total:</span>
-                        <span class="text-lg font-bold text-gray-900 dark:text-white">
+                <div v-if="cartStore.items.length > 0" class="p-4 border-t border-gray-100 bg-gray-50/80">
+                    <div class="flex items-end justify-between mb-4">
+                        <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Estimated Total</span>
+                        <span class="text-lg font-black text-gray-900 font-mono tracking-tight">
                             ${{ Number(cartStore.totalAmount).toFixed(2) }}
                         </span>
                     </div>
-                    <Button 
+                    
+                    <button 
                         @click="goToCheckout" 
-                        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                        class="w-full bg-amber-400 text-white font-bold py-3 px-4 rounded-xl hover:bg-amber-500 transition-colors flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-sm"
                     >
-                        <Icon icon="mdi:cart-check" class="mr-2" />
-                        Order
-                    </Button>
+                        <span>Proceed to Checkout</span>
+                        <Icon icon="mdi:arrow-right" class="text-sm" />
+                    </button>
                 </div>
             </div>
         </Transition>
@@ -132,11 +146,11 @@ defineExpose({ toggle });
 <style scoped>
 .dropdown-enter-active,
 .dropdown-leave-active {
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dropdown-enter-from,
 .dropdown-leave-to {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(10px) scale(0.95);
 }
 </style>

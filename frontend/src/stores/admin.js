@@ -6,6 +6,8 @@ export const useAdminStore = defineStore('admin', () => {
     const categories = ref([]);
     const components = ref([]);
     const categoryStats = ref([]); // For component counts per category
+    const orders = ref([]);
+    const stats = ref(null);
     const isLoading = ref(false);
     const error = ref(null);
 
@@ -127,10 +129,40 @@ export const useAdminStore = defineStore('admin', () => {
         }
     };
 
+    // --- Orders (Admin) ---
+
+    const fetchOrders = async () => {
+        isLoading.value = true;
+        try {
+            const response = await api.get('/orders/admin/all');
+            orders.value = response.data;
+        } catch (err) {
+            error.value = err.response?.data?.msg || err.message;
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    // --- Stats (Admin Dashboard) ---
+
+    const fetchStats = async () => {
+        isLoading.value = true;
+        try {
+            const response = await api.get('/orders/admin/stats');
+            stats.value = response.data;
+        } catch (err) {
+            error.value = err.response?.data?.msg || err.message;
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     return {
         categories,
         components,
         categoryStats,
+        orders,
+        stats,
         isLoading,
         error,
         fetchCategories,
@@ -140,6 +172,8 @@ export const useAdminStore = defineStore('admin', () => {
         fetchComponents,
         createComponent,
         updateComponent,
-        deleteComponent
+        deleteComponent,
+        fetchOrders,
+        fetchStats
     };
 });

@@ -3,6 +3,8 @@ import Home from '../views/Home.vue';
 import SignIn from '../views/auth/SignIn.vue';
 import SignUp from '../views/auth/SignUp.vue';
 import AdminDashboard from '../views/admin/AdminDashboard.vue';
+import AdminOrders from '../views/admin/AdminOrders.vue';
+import AdminAnalytics from '../views/admin/AdminAnalytics.vue';
 import Checkout from '../views/Checkout.vue';
 import PCBuilder from '../views/PCBuilder.vue';
 import SavedBuilds from '../views/SavedBuilds.vue';
@@ -25,6 +27,21 @@ const routes = [
         children: [
             {
                 path: '',
+                name: 'AdminDefault',
+                redirect: { name: 'AdminAnalytics' }
+            },
+            {
+                path: 'orders',
+                name: 'AdminOrders',
+                component: AdminOrders
+            },
+            {
+                path: 'analytics',
+                name: 'AdminAnalytics',
+                component: AdminAnalytics
+            },
+            {
+                path: 'inventory',
                 name: 'AdminDashboard',
                 component: AdminDashboard
             }

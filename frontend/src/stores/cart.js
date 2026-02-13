@@ -87,6 +87,38 @@ export const useCartStore = defineStore('cart', () => {
         }
     };
 
+    const removeCartItem = async (itemId) => {
+        isLoading.value = true;
+        error.value = null;
+        try {
+            const response = await api.delete(`/cart/item/${itemId}`);
+            cart.value = response.data;
+            return { success: true };
+        } catch (err) {
+            console.error('Failed to remove item:', err);
+            error.value = err.response?.data?.msg || 'Failed to remove item';
+            return { success: false, error: error.value };
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    const updateCartItemQuantity = async (itemId, quantity) => {
+        isLoading.value = true;
+        error.value = null;
+        try {
+            const response = await api.patch(`/cart/item/${itemId}`, { quantity });
+            cart.value = response.data;
+            return { success: true };
+        } catch (err) {
+            console.error('Failed to update quantity:', err);
+            error.value = err.response?.data?.msg || 'Failed to update quantity';
+            return { success: false, error: error.value };
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     const showModal = (product) => {
         lastAddedProduct.value = product;
         showAddedModal.value = true;
@@ -109,6 +141,8 @@ export const useCartStore = defineStore('cart', () => {
         fetchCart,
         addToCart,
         checkout,
+        removeCartItem,
+        updateCartItemQuantity,
         showModal,
         hideModal
     };

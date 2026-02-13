@@ -44,7 +44,7 @@ export const getMyPaidOrderById = async (req, res) => {
 export const getAllOrdersAdmin = async (req, res) => {
   try {
     // Note: Assure-toi que ton middleware isAdmin protège cette route
-    
+
     const orders = await prisma.order.findMany({
       where: {
         status: "PAID" // On ne veut que les commandes validées
@@ -64,13 +64,13 @@ export const getAllOrdersAdmin = async (req, res) => {
         items: {
           include: {
             component: { // On inclut les détails des produits
-                select: {
-                    name: true,
-                    brand: true,
-                    price: true,
-                    ImageUrl: true
-                }
-            } 
+              select: {
+                name: true,
+                brand: true,
+                price: true,
+                ImageUrl: true
+              }
+            }
           }
         }
       }
@@ -80,5 +80,97 @@ export const getAllOrdersAdmin = async (req, res) => {
   } catch (e) {
     console.error("GET ADMIN ORDERS ERROR:", e);
     return res.status(500).json({ msg: "Failed to fetch all orders" });
+  }
+};
+
+// GET /api/orders/admin/stats (ADMIN ONLY)
+export const getAdminStats = async (req, res) => {
+  try {
+    // 1) Total revenue from paid orders
+    const revenueResult = await prisma.order.aggregate({
+      where: { status: "PAID" },
+      _sum: { totalAmount: true },
+      _count: true,
+    });
+
+    // 2) Total customers
+    const customerCount = await prisma.user.count({
+      where: { role: "Customer" },
+    });
+
+    // 3) Total products
+    const productCount = await prisma.component.count();
+
+    // 4) Low stock products (stock <= 5)
+    const lowStockCount = await prisma.component.count({
+      where: { stock: { lte: 5 } },
+    });
+
+    // 5) Top-selling products (by quantity sold)
+    const topProducts = await prisma.orderItem.groupBy({
+      by: ['componentId'],
+      where: { order: { status: "PAID" } },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: 5,
+    });
+
+    // Enrich top products with component details
+    const topProductsDetails = await Promise.all(
+      topProducts.map(async (tp) => {
+        const comp = await prisma.component.findUnique({
+          where: { id: tp.componentId },
+          select: { name: true, brand: true, price: true, ImageUrl: true },
+        });
+        return {
+          ...comp,
+          totalSold: tp._sum.quantity,
+        };
+      })
+    );
+
+    // 6) Revenue by category
+    const allPaidItems = await prisma.orderItem.findMany({
+      where: { order: { status: "PAID" } },
+      include: {
+        component: {
+          select: { category: { select: { name: true } } },
+        },
+      },
+    });
+
+    const revenueByCategory = {};
+    for (const item of allPaidItems) {
+      const catName = item.component?.category?.name || "Unknown";
+      const itemTotal = Number(item.unitPrice) * item.quantity;
+      revenueByCategory[catName] = (revenueByCategory[catName] || 0) + itemTotal;
+    }
+
+    // 7) Orders over time (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentOrders = await prisma.order.findMany({
+      where: { status: "PAID", createdAt: { gte: thirtyDaysAgo } },
+      orderBy: { createdAt: "asc" },
+      select: { createdAt: true, totalAmount: true },
+    });
+
+    return res.status(200).json({
+      totalRevenue: Number(revenueResult._sum.totalAmount || 0),
+      totalOrders: revenueResult._count,
+      totalCustomers: customerCount,
+      totalProducts: productCount,
+      lowStockCount,
+      topProducts: topProductsDetails,
+      revenueByCategory: Object.entries(revenueByCategory).map(([name, revenue]) => ({ name, revenue: Number(revenue.toFixed(2)) })),
+      recentOrders: recentOrders.map(o => ({
+        date: o.createdAt.toISOString().split('T')[0],
+        amount: Number(o.totalAmount),
+      })),
+    });
+  } catch (e) {
+    console.error("GET ADMIN STATS ERROR:", e);
+    return res.status(500).json({ msg: "Failed to fetch stats" });
   }
 };
